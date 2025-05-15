@@ -1,0 +1,57 @@
+{
+  "name": "aztec-nextjs-starter",
+  "version": "1.0.0",
+  "description": "Aztec NextJS boilerplate code",
+  "author": {
+    "name": "Satyam Bansal <satyambnsal@gmail.com>",
+    "url": "git@github.com:satyambnsal/aztec-nextjs-starter.git"
+  },
+  "scripts": {
+    "circuits::build": "cd circuits && aztec-nargo build",
+    "circuits::compile": "cd circuits && aztec-nargo compile",
+    "circuits::test": "cd circuits && aztec-nargo compile && aztec test",
+    "circuits::gate-count": "sh scripts/build-gates-report.sh",
+    "circuits::codegen": "cd circuits && aztec codegen target --outdir ../src/artifacts",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": [
+    "NextJS",
+    "Aztec",
+    "Noir"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.10",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.503.0",
+    "next": "15.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.2.0",
+    "@aztec/bb.js": "^0.85.0",
+    "@noir-lang/acvm_js": "^1.0.0-beta.3",
+    "@noir-lang/noir_js": "^1.0.0-beta.3",
+    "@noir-lang/noir_wasm": "^1.0.0-beta.3",
+    "@noir-lang/noirc_abi": "^1.0.0-beta.3"
+  },
+  "devDependencies": {
+    "@noir-lang/noir_codegen": "^1.0.0-beta.3",
+    "@tailwindcss/postcss": "^4.1.4",
+    "@types/node": "^20.8.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.50.0",
+    "eslint-config-next": "^13.5.4",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.4",
+    "tw-animate-css": "^1.2.7",
+    "typescript": "^5.2.2"
+  }
+}
