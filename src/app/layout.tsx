@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Joti_One } from 'next/font/google'
 import './globals.css'
+import { Header } from '@/components/Header'
 
 const inter = Inter({ subsets: ['latin'] })
 const jotiOne = Joti_One({
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.className} ${jotiOne.variable} bg-black text-white`}>
+        <Header />
         {children}
       </body>
     </html>

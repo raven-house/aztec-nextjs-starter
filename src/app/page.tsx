@@ -1,3 +1,3 @@
 export default function Home() {
-  return <div>Hello</div>
+  return <div className="py-10">Welcome to aztec starter</div>
 }
