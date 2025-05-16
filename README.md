@@ -6,8 +6,6 @@ A modern Next.js starter template with Aztec Network integration for building pr
 
 This starter repository provides a foundation for developing decentralized applications on Aztec Network, featuring wallet integration for both Azguard and Obsidion wallets, along with a complete example of a private voting contract implementation.
 
-![Aztec Starter](https://example.com/aztec-starter-screenshot.png)
-
 ## Features
 
 - **Wallet Integration**: Ready-to-use connections with Azguard and Obsidion wallets
