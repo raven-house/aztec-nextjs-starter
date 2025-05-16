@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { Wallet, Copy, CheckCircle, LogOut, ChevronDown, User } from 'lucide-react'
 import {
   DropdownMenu,
@@ -44,13 +43,6 @@ export default function WalletMenu({
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-
-        <Link href="/profile">
-          <DropdownMenuItem className="cursor-pointer">
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-          </DropdownMenuItem>
-        </Link>
 
         <DropdownMenuItem
           onClick={handleCopy}
