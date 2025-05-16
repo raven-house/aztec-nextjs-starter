@@ -3,6 +3,7 @@ import { Inter, Joti_One } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/Header'
 import { GlobalContextProvider } from '@/contexts/GlobalContext'
+import { Toaster } from '@/components/ui/sonner'
 
 const inter = Inter({ subsets: ['latin'] })
 const jotiOne = Joti_One({
@@ -26,6 +27,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </>
         </GlobalContextProvider>
+
+        <Toaster />
       </body>
     </html>
   )

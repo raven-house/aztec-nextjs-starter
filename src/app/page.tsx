@@ -1,6 +1,7 @@
 'use client'
 import { GlobalContext } from '@/contexts/GlobalContext'
 import { useContext, useState } from 'react'
+import { toast } from 'sonner'
 import { EasyPrivateVotingContract } from '../artifacts/EasyPrivateVoting'
 import { Contract } from '@nemi-fi/wallet-sdk/eip1193'
 import { useAccount } from '@nemi-fi/wallet-sdk/react'
@@ -18,10 +19,8 @@ import { Loader2, Vote, CheckCircle, AlertCircle, Key } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { getContractInstanceFromDeployParams, Fr } from '@aztec/aztec.js'
+import { getContractInstanceFromDeployParams, Fr, AztecAddress } from '@aztec/aztec.js'
 import { NodeInfo } from '@/components/NodeInfo'
-
-import { DeployMethod } from '@nemi-fi/wallet-sdk'
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
 
@@ -33,6 +32,34 @@ export default function Home() {
   const [deployStatus, setDeployStatus] = useState({ success: false, error: false, txHash: '' })
   const [adminAddress, setAdminAddress] = useState('')
   const [adminAddressError, setAdminAddressError] = useState('')
+  const [contractAddress, setContractAddress] = useState<AztecAddress | null>(null)
+  const [isCastingVote, setIsCastingVote] = useState(false)
+  const [isEndingVote, setIsEndingVote] = useState(false)
+  const [isCheckingVotes, setIsCheckingVotes] = useState(false)
+  const [voteCount, setVoteCount] = useState(0)
+  const [isVoteEnded, setIsVoteEnded] = useState(false)
+
+  const getVotingContract = async (): Promise<Contract<EasyPrivateVotingContract> | null> => {
+    if (!account) {
+      toast.error('Please connect wallet first')
+      return null
+    }
+
+    try {
+      const address = contractAddress || (await computeContractAddress(account))
+
+      if (!address) {
+        toast.error('Please deploy contract first')
+        return null
+      }
+      const votingContract = await EasyPrivateVoting.at(address, account)
+      return votingContract
+    } catch (err) {
+      console.error('Error getting voting contract:', err)
+      toast.error('Failed to connect to contract')
+      return null
+    }
+  }
 
   const validateAddress = (address: string) => {
     if (!address) return 'Admin address is required'
@@ -80,11 +107,14 @@ export default function Home() {
         .send()
         .wait({ timeout: 200000 })
       console.log('deploy TX', deployTx)
+
+      setContractAddress(deployTx.contract.address)
       setDeployStatus({
         success: true,
         error: false,
         txHash: deployTx.txHash.toString() || 'Transaction submitted',
       })
+      toast.success('Contract deployed successfully!')
     } catch (error) {
       console.error('Deployment error:', error)
       setDeployStatus({
@@ -92,35 +122,106 @@ export default function Home() {
         error: true,
         txHash: '',
       })
+      toast.error('Failed to deploy contract')
     } finally {
       setIsDeploying(false)
     }
   }
 
   const handleRegisterContract = async () => {
-    const contractInstance = await getContractInstanceFromDeployParams(
-      EasyPrivateVotingContract.artifact,
-      {
-        salt: CONTRACT_ADDRESS_SALT,
-        constructorArgs: [account!.getAddress()],
-        deployer: account!.getAddress(),
-      }
-    )
-    console.log('Contract address to be registered', contractInstance.address.toString())
+    try {
+      toast.info('Registering contract class...')
 
-    const txn = await account
-      ?.sendTransaction({
-        calls: [],
-        registerContracts: [
-          {
-            address: contractInstance.address,
-            instance: contractInstance,
-            artifact: EasyPrivateVoting.artifact,
-          },
-        ],
-      })
-      .wait()
-    console.log('Register contract call', txn?.txHash.toString())
+      const contractInstance = await getContractInstanceFromDeployParams(
+        EasyPrivateVotingContract.artifact,
+        {
+          salt: CONTRACT_ADDRESS_SALT,
+          constructorArgs: [account!.getAddress()],
+          deployer: account!.getAddress(),
+        }
+      )
+      console.log('Contract address to be registered', contractInstance.address.toString())
+
+      const txn = await account
+        ?.sendTransaction({
+          calls: [],
+          registerContracts: [
+            {
+              address: contractInstance.address,
+              instance: contractInstance,
+              artifact: EasyPrivateVoting.artifact,
+            },
+          ],
+        })
+        .wait()
+      console.log('Register contract call', txn?.txHash.toString())
+
+      toast.success('Contract class registered successfully')
+    } catch (error) {
+      console.error('Registration error:', error)
+      toast.error('Failed to register contract class')
+    }
+  }
+
+  const handleCastVote = async () => {
+    setIsCastingVote(true)
+
+    try {
+      const votingContract = await getVotingContract()
+      if (!votingContract) return
+
+      // Cast vote for option 1
+      const tx = await votingContract.methods.cast_vote(1).send().wait()
+      console.log('Vote cast transaction:', tx)
+
+      toast.success('Vote cast successfully!')
+
+      // Check the updated vote count
+      await handleCheckVotes()
+    } catch (err) {
+      console.error('Error casting vote:', err)
+      toast.error('Failed to cast vote')
+    } finally {
+      setIsCastingVote(false)
+    }
+  }
+
+  const handleEndVote = async () => {
+    setIsEndingVote(true)
+
+    try {
+      const votingContract = await getVotingContract()
+      if (!votingContract) return
+
+      const tx = await votingContract.methods.end_vote().send().wait()
+      console.log('End vote transaction:', tx)
+
+      setIsVoteEnded(true)
+      toast.success('Voting has ended successfully')
+    } catch (err) {
+      console.error('Error ending vote:', err)
+      toast.error('Failed to end voting')
+    } finally {
+      setIsEndingVote(false)
+    }
+  }
+
+  const handleCheckVotes = async () => {
+    setIsCheckingVotes(true)
+
+    try {
+      const votingContract = await getVotingContract()
+      if (!votingContract) return
+
+      const count = await votingContract.methods.get_vote(1).simulate()
+      setVoteCount(Number(count))
+      toast.success(`Current vote count for option 1: ${count}`)
+    } catch (err) {
+      console.error('Error checking votes:', err)
+      toast.error('Failed to check votes')
+    } finally {
+      setIsCheckingVotes(false)
+    }
   }
 
   if (!walletAddress) {
@@ -160,6 +261,11 @@ export default function Home() {
                 <Vote className="h-6 w-6 text-primary" />
                 Easy Private Voting
               </CardTitle>
+              {isVoteEnded && (
+                <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded-full text-xs">
+                  Voting Ended
+                </span>
+              )}
             </div>
             <CardDescription>Deploy a private voting contract on Aztec Network</CardDescription>
           </CardHeader>
@@ -207,6 +313,27 @@ export default function Home() {
               </p>
             </div>
 
+            {contractAddress && (
+              <div className="p-4 rounded-lg border border-border bg-secondary/10">
+                <div className="flex flex-col space-y-1">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Contract Address
+                  </span>
+                  <span className="font-mono text-sm text-foreground break-all">
+                    {contractAddress.toString()}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {voteCount > 0 && (
+              <Alert className="border-chart-2/30 bg-secondary/10">
+                <CheckCircle className="h-4 w-4 text-chart-2" />
+                <AlertTitle className="text-chart-2">Current Vote Count: {voteCount}</AlertTitle>
+                <AlertDescription>The current number of votes cast for option 1.</AlertDescription>
+              </Alert>
+            )}
+
             {deployStatus.success && (
               <Alert className="border-chart-2/30 bg-secondary/10">
                 <CheckCircle className="h-4 w-4 text-chart-2" />
@@ -228,29 +355,82 @@ export default function Home() {
             )}
           </CardContent>
 
-          <CardFooter className="flex flex-col sm:flex-row gap-4">
-            <Button
-              variant="outline"
-              onClick={handleRegisterContract}
-              className="w-full sm:w-auto"
-            >
-              Register Contract Class
-            </Button>
-            <Button
-              size="lg"
-              className="w-full sm:w-auto flex-1"
-              onClick={handleEasyVotingContractDeploy}
-              disabled={isDeploying}
-            >
-              {isDeploying ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deploying Contract...
-                </>
-              ) : (
-                'Deploy Easy Voting Contract'
-              )}
-            </Button>
+          <CardFooter className="flex flex-wrap gap-4">
+            {!contractAddress ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleRegisterContract}
+                  className="flex-1"
+                >
+                  Register Contract Class
+                </Button>
+                <Button
+                  size="lg"
+                  className="flex-1"
+                  onClick={handleEasyVotingContractDeploy}
+                  disabled={isDeploying}
+                >
+                  {isDeploying ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deploying Contract...
+                    </>
+                  ) : (
+                    'Deploy Voting Contract'
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  onClick={handleCastVote}
+                  disabled={isCastingVote || isVoteEnded}
+                  className="flex-1"
+                >
+                  {isCastingVote ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Casting Vote...
+                    </>
+                  ) : (
+                    'Cast Vote (Option 1)'
+                  )}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={handleCheckVotes}
+                  disabled={isCheckingVotes}
+                  className="flex-1"
+                >
+                  {isCheckingVotes ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    'Check Votes'
+                  )}
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  onClick={handleEndVote}
+                  disabled={isEndingVote || isVoteEnded}
+                  className="flex-1"
+                >
+                  {isEndingVote ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Ending Vote...
+                    </>
+                  ) : (
+                    'End Voting'
+                  )}
+                </Button>
+              </>
+            )}
           </CardFooter>
         </Card>
 
@@ -260,4 +440,22 @@ export default function Home() {
       </div>
     </div>
   )
+}
+
+const computeContractAddress = async (account: any) => {
+  try {
+    const contractInstance = await getContractInstanceFromDeployParams(
+      EasyPrivateVotingContract.artifact,
+      {
+        salt: CONTRACT_ADDRESS_SALT,
+        constructorArgs: [account.getAddress()],
+        deployer: account.getAddress(),
+      }
+    )
+
+    return contractInstance.address
+  } catch (err) {
+    console.error('Error computing contract address:', err)
+    return null
+  }
 }
