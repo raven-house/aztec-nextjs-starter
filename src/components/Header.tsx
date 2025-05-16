@@ -99,7 +99,6 @@ export const Header = () => {
       setIsConnecting(false)
     }
   }
-  console.log('azguardAddress', azguardAddress)
 
   const handleDisconnect = async () => {
     try {
@@ -126,7 +125,10 @@ export const Header = () => {
     <div className="p-2">
       <div className="flex items-center justify-between">
         <div>Aztec Starter</div>
-        <Badge variant="secondary" className="px-4 py-2">
+        <Badge
+          variant="secondary"
+          className="px-4 py-2"
+        >
           {APP_MODE}
         </Badge>
 
@@ -137,14 +139,20 @@ export const Header = () => {
           />
         ) : (
           <>
-            <Button onClick={() => setIsWalletDialogOpen(true)} disabled={isConnecting}>
+            <Button
+              onClick={() => setIsWalletDialogOpen(true)}
+              disabled={isConnecting}
+            >
               <span className="relative z-10 flex items-center">
                 {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Connect Wallet
               </span>
             </Button>
 
-            <Dialog open={isWalletDialogOpen} onOpenChange={setIsWalletDialogOpen}>
+            <Dialog
+              open={isWalletDialogOpen}
+              onOpenChange={setIsWalletDialogOpen}
+            >
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Connect Wallet</DialogTitle>
