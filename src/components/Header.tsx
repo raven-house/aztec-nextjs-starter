@@ -7,10 +7,15 @@ import { useAccount } from '@nemi-fi/wallet-sdk/react'
 import { OBSIDION_WALLET_URL, TESTNET_NODE_URL } from '@/constants'
 import { Button } from './ui/button'
 import WalletMenu from './wallet/WalletMenu'
-import { AzguardRpcClient } from '@azguardwallet/types'
+import { AzguardRpcClient, DappPermissions, DappMetadata } from '@azguardwallet/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 
-const buildConnectionParams = () => {
+type BuildConnectionParamsType = {
+  dappMetadata: DappMetadata
+  requiredPermissions: DappPermissions[]
+}
+
+const buildConnectionParams = (): BuildConnectionParamsType => {
   return {
     dappMetadata: {
       name: 'Aztec Starter',
