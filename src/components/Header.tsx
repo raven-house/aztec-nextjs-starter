@@ -8,6 +8,7 @@ import { OBSIDION_WALLET_URL, TESTNET_NODE_URL } from '@/constants'
 import { Button } from './ui/button'
 import WalletMenu from './wallet/WalletMenu'
 import { AzguardRpcClient } from '@azguardwallet/types'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 
 const buildConnectionParams = () => {
   return {
@@ -42,8 +43,9 @@ export const sdk = new AztecWalletSdk({
 
 export const Header = () => {
   const [isConnecting, setIsConnecting] = useState(false)
-  const account = useAccount(sdk)
-  const accountAddress = account?.address?.toString() || ''
+  const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false)
+  const obsidionAccount = useAccount(sdk)
+  const obsidionAddress = obsidionAccount?.address?.toString() || ''
 
   const [azguardAccount, setAzguardAccount] = useState('')
   const [azguardAddress, setAzguardAddress] = useState<string | undefined>('')
@@ -53,6 +55,7 @@ export const Header = () => {
   const handleConnectObsidion = async () => {
     try {
       setIsConnecting(true)
+      setIsWalletDialogOpen(false)
       await sdk.connect('obsidion')
     } catch (error) {
       console.error('Failed to Connect to Obsidion wallet', error)
@@ -63,6 +66,8 @@ export const Header = () => {
 
   const handleConnectAzguard = async () => {
     try {
+      setIsConnecting(true)
+      setIsWalletDialogOpen(false)
       if (window.azguard) {
         const azguard = window.azguard.createClient() as AzguardRpcClient
         setAzguardClient(azguard)
@@ -78,16 +83,21 @@ export const Header = () => {
       }
     } catch (err) {
       console.log('ERROR CONNECTION AZGUARD', err)
+    } finally {
+      setIsConnecting(false)
     }
   }
-
   console.log('azguardAddress', azguardAddress)
 
   const handleDisconnect = async () => {
     try {
       await sdk.disconnect()
+      setAzguardAddress(undefined)
+      setAzguardAccount('')
+      setAzguardSessionId('')
+      setAzguardClient(null)
     } catch (error) {
-      console.error('Failed to Disconnect to Obsidion wallet', error)
+      console.error('Failed to Disconnect wallet', error)
     }
   }
 
@@ -96,21 +106,66 @@ export const Header = () => {
       <div className="flex items-center justify-between">
         <div>Aztec Starter</div>
 
-        {azguardAddress ? (
+        {azguardAddress || obsidionAddress ? (
           <WalletMenu
-            accountAddress={azguardAddress || ''}
+            accountAddress={azguardAddress || obsidionAddress}
             handleDisconnect={handleDisconnect}
           />
         ) : (
-          <Button
-            onClick={handleConnectAzguard}
-            disabled={isConnecting}
-          >
-            <span className="relative z-10 flex items-center">
-              {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Connect Wallet
-            </span>
-          </Button>
+          <>
+            <Button
+              onClick={() => setIsWalletDialogOpen(true)}
+              disabled={isConnecting}
+            >
+              <span className="relative z-10 flex items-center">
+                {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Connect Wallet
+              </span>
+            </Button>
+
+            <Dialog
+              open={isWalletDialogOpen}
+              onOpenChange={setIsWalletDialogOpen}
+            >
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Connect Wallet</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col gap-4 py-4">
+                  <Button
+                    onClick={handleConnectAzguard}
+                    className="w-full justify-start"
+                    disabled={isConnecting}
+                  >
+                    <img
+                      src="assets/azguard-logo.png"
+                      alt="Azguard"
+                      className="mr-2 h-5 w-5"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                    Azguard
+                  </Button>
+                  <Button
+                    onClick={handleConnectObsidion}
+                    className="w-full justify-start"
+                    disabled={isConnecting}
+                  >
+                    <img
+                      src="assets/obsidion-logo.svg"
+                      alt="Obsidion"
+                      className="mr-2 h-5 w-5"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                    Obsidion
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </>
         )}
       </div>
     </div>
