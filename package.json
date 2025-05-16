@@ -24,6 +24,8 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@azguardwallet/client": "^0.4.2",
+    "@azguardwallet/types": "^0.4.1",
     "@aztec/bb.js": "^0.85.0",
     "@nemi-fi/wallet-sdk": "0.85.0-next.5",
     "@noir-lang/acvm_js": "^1.0.0-beta.3",

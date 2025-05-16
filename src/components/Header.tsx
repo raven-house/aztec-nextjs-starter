@@ -7,6 +7,33 @@ import { useAccount } from '@nemi-fi/wallet-sdk/react'
 import { OBSIDION_WALLET_URL, TESTNET_NODE_URL } from '@/constants'
 import { Button } from './ui/button'
 import WalletMenu from './wallet/WalletMenu'
+import { AzguardRpcClient } from '@azguardwallet/types'
+
+const buildConnectionParams = () => {
+  return {
+    dappMetadata: {
+      name: 'Aztec Starter',
+      description:
+        'A modern Next.js starter template with Aztec integration for building web3 applications',
+      logo: 'https://somestaffspace.fra1.digitaloceanspaces.com/logo.png',
+      url: 'https://azguardwallet.io/',
+    },
+
+    requiredPermissions: [
+      {
+        chains: ['aztec:11155111'],
+        methods: [
+          'register_contract',
+          'send_transaction',
+          'call',
+          'simulate_utility',
+          'add_capsule',
+        ],
+        events: [],
+      },
+    ],
+  }
+}
 
 export const sdk = new AztecWalletSdk({
   aztecNode: TESTNET_NODE_URL,
@@ -18,7 +45,12 @@ export const Header = () => {
   const account = useAccount(sdk)
   const accountAddress = account?.address?.toString() || ''
 
-  const handleConnect = async () => {
+  const [azguardAccount, setAzguardAccount] = useState('')
+  const [azguardAddress, setAzguardAddress] = useState<string | undefined>('')
+  const [azguardSessionId, setAzguardSessionId] = useState('')
+  const [azguardClient, setAzguardClient] = useState<AzguardRpcClient | null>(null)
+
+  const handleConnectObsidion = async () => {
     try {
       setIsConnecting(true)
       await sdk.connect('obsidion')
@@ -28,6 +60,28 @@ export const Header = () => {
       setIsConnecting(false)
     }
   }
+
+  const handleConnectAzguard = async () => {
+    try {
+      if (window.azguard) {
+        const azguard = window.azguard.createClient() as AzguardRpcClient
+        setAzguardClient(azguard)
+
+        const sessionValue = await azguard.request('connect', buildConnectionParams())
+        if (sessionValue?.id) {
+          setAzguardSessionId(sessionValue.id)
+          const accounts = sessionValue?.accounts || []
+          setAzguardAccount(accounts[0])
+          const address = accounts[0].split(':').at(-1)
+          setAzguardAddress(address)
+        }
+      }
+    } catch (err) {
+      console.log('ERROR CONNECTION AZGUARD', err)
+    }
+  }
+
+  console.log('azguardAddress', azguardAddress)
 
   const handleDisconnect = async () => {
     try {
@@ -42,14 +96,14 @@ export const Header = () => {
       <div className="flex items-center justify-between">
         <div>Aztec Starter</div>
 
-        {accountAddress ? (
+        {azguardAddress ? (
           <WalletMenu
-            accountAddress={accountAddress}
+            accountAddress={azguardAddress || ''}
             handleDisconnect={handleDisconnect}
           />
         ) : (
           <Button
-            onClick={handleConnect}
+            onClick={handleConnectAzguard}
             disabled={isConnecting}
           >
             <span className="relative z-10 flex items-center">
