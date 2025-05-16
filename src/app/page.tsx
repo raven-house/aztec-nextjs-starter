@@ -1,6 +1,6 @@
 'use client'
 import { GlobalContext } from '@/contexts/GlobalContext'
-import { useContext, useState, useEffect } from 'react'
+import { useContext, useState } from 'react'
 import { EasyPrivateVotingContract } from '../artifacts/EasyPrivateVoting'
 import { Contract } from '@nemi-fi/wallet-sdk/eip1193'
 import { useAccount } from '@nemi-fi/wallet-sdk/react'
@@ -14,18 +14,12 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Loader2, Vote, CheckCircle, AlertCircle, Key, LockKeyhole, Shield } from 'lucide-react'
+import { Loader2, Vote, CheckCircle, AlertCircle, Key } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  AztecAddress,
-  registerContractClass,
-  FunctionCall,
-  getContractInstanceFromDeployParams,
-  Fr,
-  PublicKeys,
-} from '@aztec/aztec.js'
+import { getContractInstanceFromDeployParams, Fr } from '@aztec/aztec.js'
+import { NodeInfo } from '@/components/NodeInfo'
 
 import { DeployMethod } from '@nemi-fi/wallet-sdk'
 
@@ -63,13 +57,6 @@ export default function Home() {
     setDeployStatus({ success: false, error: false, txHash: '' })
 
     try {
-      // const deployTx = await EasyPrivateVoting.deploy(
-      //   account!,
-      //   AztecAddress.fromString(adminAddress)
-      // )
-      //   .send({})
-      //   .wait({ timeout: 200000 })
-
       const contractInstance = await getContractInstanceFromDeployParams(
         EasyPrivateVotingContract.artifact,
         {
@@ -79,7 +66,7 @@ export default function Home() {
         }
       )
 
-      console.log('Contract instace to be deployed', contractInstance.address.toString())
+      console.log('Contract instance to be deployed', contractInstance.address.toString())
 
       const deployTx = await EasyPrivateVoting.deployWithOpts(
         {
@@ -133,10 +120,6 @@ export default function Home() {
         ],
       })
       .wait()
-    // const deployTx = await registerContractClass(account!, EasyPrivateVotingContract.artifact).then(
-    //   (c) => c.send().wait()
-    // )
-    // console.log('Deploy transaction hash', deployTx.txHash.toString())
     console.log('Register contract call', txn?.txHash.toString())
   }
 
@@ -151,7 +134,10 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Alert variant="destructive" className="border-muted bg-secondary/20">
+            <Alert
+              variant="destructive"
+              className="border-muted bg-secondary/20"
+            >
               <AlertCircle className="h-4 w-4 text-primary" />
               <AlertTitle className="text-primary">Wallet Required</AlertTitle>
               <AlertDescription>
@@ -166,98 +152,112 @@ export default function Home() {
 
   return (
     <div className="container mx-auto py-10 px-4">
-      <Card className="w-full max-w-2xl mx-auto border-border bg-gradient-to-b from-card to-background shadow-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Vote className="h-6 w-6 text-primary" />
-              Easy Private Voting
-            </CardTitle>
-          </div>
-          <CardDescription>Deploy a private voting contract on Aztec Network</CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          <div className="p-4 rounded-lg border border-border bg-secondary/10">
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm font-medium text-muted-foreground">Connected Wallet</span>
-              <span className="font-mono text-sm break-all text-foreground">{walletAddress}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 border-border bg-gradient-to-b from-card to-background shadow-lg">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Vote className="h-6 w-6 text-primary" />
+                Easy Private Voting
+              </CardTitle>
             </div>
-          </div>
+            <CardDescription>Deploy a private voting contract on Aztec Network</CardDescription>
+          </CardHeader>
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="admin-address"
-              className="text-sm font-medium text-primary flex items-center gap-2"
+          <CardContent className="space-y-6">
+            <div className="p-4 rounded-lg border border-border bg-secondary/10">
+              <div className="flex flex-col space-y-1">
+                <span className="text-sm font-medium text-muted-foreground">Connected Wallet</span>
+                <span className="font-mono text-sm text-foreground">{walletAddress}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="admin-address"
+                className="text-sm font-medium text-primary flex items-center gap-2"
+              >
+                <Key className="h-4 w-4" /> Admin Address
+              </Label>
+              <Input
+                id="admin-address"
+                type="text"
+                value={adminAddress}
+                onChange={handleAdminAddressChange}
+                placeholder="0x..."
+                className={`font-mono ${
+                  adminAddressError ? 'border-destructive' : 'border-border'
+                }`}
+              />
+              {adminAddressError && (
+                <p className="text-xs text-destructive mt-1">{adminAddressError}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                This address will have admin privileges in the voting contract. By default, your
+                current wallet address is used.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-primary">About Private Voting</h3>
+              <p className="text-muted-foreground text-sm">
+                This contract allows for private voting where votes are encrypted and tallied
+                without revealing individual choices. Perfect for DAOs, communities, and
+                organizations that value privacy.
+              </p>
+            </div>
+
+            {deployStatus.success && (
+              <Alert className="border-chart-2/30 bg-secondary/10">
+                <CheckCircle className="h-4 w-4 text-chart-2" />
+                <AlertTitle className="text-chart-2">Deployment Successful</AlertTitle>
+                <AlertDescription className="font-mono text-xs break-all text-muted-foreground">
+                  Transaction Hash: {deployStatus.txHash}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {deployStatus.error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Deployment Failed</AlertTitle>
+                <AlertDescription>
+                  There was an error deploying your contract. Please try again.
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+
+          <CardFooter className="flex flex-col sm:flex-row gap-4">
+            <Button
+              variant="outline"
+              onClick={handleRegisterContract}
+              className="w-full sm:w-auto"
             >
-              <Key className="h-4 w-4" /> Admin Address
-            </Label>
-            <Input
-              id="admin-address"
-              type="text"
-              value={adminAddress}
-              onChange={handleAdminAddressChange}
-              placeholder="0x..."
-              className={`font-mono ${adminAddressError ? 'border-destructive' : 'border-border'}`}
-            />
-            {adminAddressError && (
-              <p className="text-xs text-destructive mt-1">{adminAddressError}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              This address will have admin privileges in the voting contract. By default, your
-              current wallet address is used.
-            </p>
-          </div>
+              Register Contract Class
+            </Button>
+            <Button
+              size="lg"
+              className="w-full sm:w-auto flex-1"
+              onClick={handleEasyVotingContractDeploy}
+              disabled={isDeploying}
+            >
+              {isDeploying ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deploying Contract...
+                </>
+              ) : (
+                'Deploy Easy Voting Contract'
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
 
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-primary">About Private Voting</h3>
-            <p className="text-muted-foreground text-sm">
-              This contract allows for private voting where votes are encrypted and tallied without
-              revealing individual choices. Perfect for DAOs, communities, and organizations that
-              value privacy.
-            </p>
-          </div>
-
-          {deployStatus.success && (
-            <Alert className="border-chart-2/30 bg-secondary/10">
-              <CheckCircle className="h-4 w-4 text-chart-2" />
-              <AlertTitle className="text-chart-2">Deployment Successful</AlertTitle>
-              <AlertDescription className="font-mono text-xs break-all text-muted-foreground">
-                Transaction Hash: {deployStatus.txHash}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {deployStatus.error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Deployment Failed</AlertTitle>
-              <AlertDescription>
-                There was an error deploying your contract. Please try again.
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-
-        <CardFooter>
-          <Button onClick={handleRegisterContract}>Register Contract Class</Button>
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={handleEasyVotingContractDeploy}
-            disabled={isDeploying}
-          >
-            {isDeploying ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deploying Contract...
-              </>
-            ) : (
-              'Deploy Easy Voting Contract'
-            )}
-          </Button>
-        </CardFooter>
-      </Card>
+        <div className="lg:col-span-1">
+          <NodeInfo />
+        </div>
+      </div>
     </div>
   )
 }
