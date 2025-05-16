@@ -9,10 +9,10 @@ const jotiOne = Joti_One({
   subsets: ['latin'],
   variable: '--font-joti-one',
 })
-
 export const metadata: Metadata = {
-  title: 'Fog of Noir',
-  description: 'A Fog of Noir strategy game built with Next.js, TypeScript, and Phaser',
+  title: 'Aztec Next.js Starter',
+  description:
+    'A modern Next.js starter template with Aztec integration for building web3 applications',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

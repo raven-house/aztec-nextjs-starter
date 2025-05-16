@@ -121,37 +121,6 @@
   }
 }
 
-
-/* Custom scrollbar for modal content */
-.modal-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
-}
-
-.modal-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.modal-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-.modal-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-}
-
-.modal-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary) rgba(0, 0, 0, 0.2);
-}
-
 .font-joti{
   font-family: var(--font-joti-one);
 }
