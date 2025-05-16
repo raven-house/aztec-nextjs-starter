@@ -1,5 +1,13 @@
 import { getInitialTestAccountsWallets } from '@aztec/accounts/testing'
-import { createPXEClient, PXE, waitForPXE } from '@aztec/aztec.js'
+import {
+  createAztecNodeClient,
+  createPXEClient,
+  Fr,
+  getContractInstanceFromDeployParams,
+  PXE,
+  registerContractClass,
+  waitForPXE,
+} from '@aztec/aztec.js'
 import { EasyPrivateVotingContract } from '../src/artifacts/EasyPrivateVoting'
 import chalk from 'chalk'
 
@@ -12,6 +20,10 @@ export const setupSandbox = async () => {
   return pxe
 }
 
+const aztecNode = createAztecNodeClient(PXE_URL)
+
+const CONTRACT_ADDRESS_SALT = Fr.fromString('11')
+
 export const deployVotingContract = async (pxe: PXE) => {
   console.log('START')
   const wallets = await getInitialTestAccountsWallets(pxe)
@@ -23,13 +35,35 @@ export const deployVotingContract = async (pxe: PXE) => {
   const thirdWallet = wallets[2]
 
   console.log('Owner wallet', ownerWallet.getAddress().toString())
-  const deployTx = await EasyPrivateVotingContract.deploy(ownerWallet, ownerWallet.getAddress())
-    .send()
-    .wait()
-
-  console.log(
-    chalk.greenBright(`Contract deployed successfully \n TXN HASH: ${deployTx.txHash.toString()}`)
+  const contractInstance = await getContractInstanceFromDeployParams(
+    EasyPrivateVotingContract.artifact,
+    {
+      salt: CONTRACT_ADDRESS_SALT,
+      constructorArgs: [ownerWallet.getAddress()],
+      deployer: ownerWallet.getAddress(),
+    }
   )
+  console.log('Contract instance address', contractInstance.address.toString())
+  const deployTx = await EasyPrivateVotingContract.deploy(ownerWallet, ownerWallet.getAddress())
+    .send({ contractAddressSalt: CONTRACT_ADDRESS_SALT, universalDeploy: false })
+    .deployed()
+
+  // console.log(
+  //   chalk.greenBright(`Contract deployed successfully \n TXN HASH: ${deployTx.txHash.toString()}`)
+  // )
+  console.log(
+    chalk.greenBright(
+      `Contract deployed successfully \n Contract Address: ${deployTx.instance.address.toString()}`
+    )
+  )
+
+  // const registrationTxReceipt = await registerContractClass(
+  //   ownerWallet,
+  //   EasyPrivateVotingContract.artifact
+  // ).then((c) => c.send().wait())
+  // const logs = await aztecNode.getContractClassLogs({ txHash: registrationTxReceipt.txHash })
+  // console.log('registration receipt txn hash', registrationTxReceipt.txHash)
+  // console.log('Logs', logs)
 }
 
 async function main() {

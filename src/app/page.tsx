@@ -18,10 +18,20 @@ import { Loader2, Vote, CheckCircle, AlertCircle, Key, LockKeyhole, Shield } fro
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { AztecAddress } from '@aztec/aztec.js'
+import {
+  AztecAddress,
+  registerContractClass,
+  FunctionCall,
+  getContractInstanceFromDeployParams,
+  Fr,
+  PublicKeys,
+} from '@aztec/aztec.js'
+
+import { DeployMethod } from '@nemi-fi/wallet-sdk'
+
+const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
 
 class EasyPrivateVoting extends Contract.fromAztec(EasyPrivateVotingContract) {}
-
 export default function Home() {
   const { walletAddress } = useContext(GlobalContext)
   const account = useAccount(sdk)
@@ -53,13 +63,35 @@ export default function Home() {
     setDeployStatus({ success: false, error: false, txHash: '' })
 
     try {
-      const deployTx = await EasyPrivateVoting.deploy(
-        account!,
-        AztecAddress.fromString(adminAddress)
+      // const deployTx = await EasyPrivateVoting.deploy(
+      //   account!,
+      //   AztecAddress.fromString(adminAddress)
+      // )
+      //   .send({})
+      //   .wait({ timeout: 200000 })
+
+      const contractInstance = await getContractInstanceFromDeployParams(
+        EasyPrivateVotingContract.artifact,
+        {
+          salt: CONTRACT_ADDRESS_SALT,
+          constructorArgs: [account!.getAddress()],
+          deployer: account!.getAddress(),
+        }
+      )
+
+      console.log('Contract instace to be deployed', contractInstance.address.toString())
+
+      const deployTx = await EasyPrivateVoting.deployWithOpts(
+        {
+          account: account!,
+          skipClassRegistration: true,
+          publicKeys: contractInstance.publicKeys,
+          method: 'constructor',
+        },
+        account!.getAddress()
       )
         .send()
         .wait({ timeout: 200000 })
-
       console.log('deploy TX', deployTx)
       setDeployStatus({
         success: true,
@@ -78,6 +110,36 @@ export default function Home() {
     }
   }
 
+  const handleRegisterContract = async () => {
+    const contractInstance = await getContractInstanceFromDeployParams(
+      EasyPrivateVotingContract.artifact,
+      {
+        salt: CONTRACT_ADDRESS_SALT,
+        constructorArgs: [account!.getAddress()],
+        deployer: account!.getAddress(),
+      }
+    )
+    console.log('Contract address to be registered', contractInstance.address.toString())
+
+    const txn = await account
+      ?.sendTransaction({
+        calls: [],
+        registerContracts: [
+          {
+            address: contractInstance.address,
+            instance: contractInstance,
+            artifact: EasyPrivateVoting.artifact,
+          },
+        ],
+      })
+      .wait()
+    // const deployTx = await registerContractClass(account!, EasyPrivateVotingContract.artifact).then(
+    //   (c) => c.send().wait()
+    // )
+    // console.log('Deploy transaction hash', deployTx.txHash.toString())
+    console.log('Register contract call', txn?.txHash.toString())
+  }
+
   if (!walletAddress) {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
@@ -89,10 +151,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Alert
-              variant="destructive"
-              className="border-muted bg-secondary/20"
-            >
+            <Alert variant="destructive" className="border-muted bg-secondary/20">
               <AlertCircle className="h-4 w-4 text-primary" />
               <AlertTitle className="text-primary">Wallet Required</AlertTitle>
               <AlertDescription>
@@ -181,6 +240,7 @@ export default function Home() {
         </CardContent>
 
         <CardFooter>
+          <Button onClick={handleRegisterContract}>Register Contract Class</Button>
           <Button
             size="lg"
             className="w-full"
