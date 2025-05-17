@@ -12,6 +12,7 @@ import { EasyPrivateVotingContract } from '../src/artifacts/EasyPrivateVoting'
 import chalk from 'chalk'
 
 const PXE_URL = 'http://localhost:8080'
+
 export const setupSandbox = async () => {
   console.log('Setup sandbox start with PXE URL', PXE_URL)
   const pxe = await createPXEClient(PXE_URL)
@@ -20,7 +21,7 @@ export const setupSandbox = async () => {
   return pxe
 }
 
-const aztecNode = createAztecNodeClient(PXE_URL)
+// const aztecNode = createAztecNodeClient(PXE_URL)
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('11')
 
@@ -34,19 +35,17 @@ export const deployVotingContract = async (pxe: PXE) => {
   const otherWallet = wallets[1]
   const thirdWallet = wallets[2]
 
-  console.log('Owner wallet', ownerWallet.getAddress().toString())
-  const contractInstance = await getContractInstanceFromDeployParams(
-    EasyPrivateVotingContract.artifact,
-    {
-      salt: CONTRACT_ADDRESS_SALT,
-      constructorArgs: [ownerWallet.getAddress()],
-      deployer: ownerWallet.getAddress(),
-    }
-  )
-  console.log('Contract instance address', contractInstance.address.toString())
+  console.log(chalk.yellowBright('Owner wallet address', ownerWallet.getAddress().toString()))
+
   const deployTx = await EasyPrivateVotingContract.deploy(ownerWallet, ownerWallet.getAddress())
-    .send({ contractAddressSalt: CONTRACT_ADDRESS_SALT, universalDeploy: false })
+    .send()
     .deployed()
+
+
+  // // Deploy contract with specific SALT
+  //   const deployTx = await EasyPrivateVotingContract.deploy(ownerWallet, ownerWallet.getAddress())
+  // .send({ contractAddressSalt: CONTRACT_ADDRESS_SALT, universalDeploy: false })
+  // .deployed()
 
   // console.log(
   //   chalk.greenBright(`Contract deployed successfully \n TXN HASH: ${deployTx.txHash.toString()}`)
@@ -56,6 +55,16 @@ export const deployVotingContract = async (pxe: PXE) => {
       `Contract deployed successfully \n Contract Address: ${deployTx.instance.address.toString()}`
     )
   )
+
+  // const contractInstance = await getContractInstanceFromDeployParams(
+  //   EasyPrivateVotingContract.artifact,
+  //   {
+  //     salt: CONTRACT_ADDRESS_SALT,
+  //     constructorArgs: [ownerWallet.getAddress()],
+  //     deployer: ownerWallet.getAddress(),
+  //   }
+  // )
+  // console.log('Contract instance address', contractInstance.address.toString())
 
   // const registrationTxReceipt = await registerContractClass(
   //   ownerWallet,

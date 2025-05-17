@@ -41,6 +41,10 @@ npm run dev
 yarn dev
 ```
 
+
+**NOTE:** You need to register your contract first using script `bun run register-contract` before trying deployment using Obsidion wallet.
+
+
 ## Environment Setup
 
 Create a `.env.local` file in the root directory with the following variables:
@@ -129,3 +133,17 @@ Consistent bullet point styling
 Proper spacing between sections
 Correctly formatted code blocks
 Links in the Resources section
+
+
+
+
+# Resources
+1. Obsidion Wallet: https://app.obsidion.xyz/
+
+
+
+
+# Notes
+What is Nargo ?
+dependency management, package management tool
+

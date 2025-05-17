@@ -13,6 +13,7 @@
     "circuits::gate-count": "sh scripts/build-gates-report.sh",
     "circuits::codegen": "cd circuits && aztec codegen target --outdir ../src/artifacts",
     "deploy-contract": "bun run scripts/deploy-contract.ts",
+    "register-contract": "bun run scripts/register-contract.ts",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
