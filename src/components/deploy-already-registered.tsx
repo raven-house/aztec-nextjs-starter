@@ -29,7 +29,7 @@ export const getDeployContractBatchCallsForAlreadyRegistered = async ({
   const instance = await getContractInstanceFromDeployParams(artifact, {
     constructorArgs,
     publicKeys: PublicKeys.default(),
-    salt: Fr.zero(),
+    salt: Fr.random(),
   })
   const { salt, currentContractClassId, initializationHash, publicKeys } = instance
 

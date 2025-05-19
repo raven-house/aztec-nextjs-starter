@@ -230,7 +230,12 @@ export default function Home() {
     console.log('Execute Params for Registration', executeParams)
     const results = await azguardClient.request('execute', executeParams)
     console.log('Registration Results', results)
-    toast.success('Contract class registered successfully')
+
+    if (Array.isArray(results) && results.every((result: any) => result.status === 'ok')) {
+      toast.success('Contract class registered successfully')
+    } else {
+      throw new Error('Registration failed - not all operations completed successfully')
+    }
   }
 
   // Azguard specific deployment
@@ -254,17 +259,22 @@ export default function Home() {
     const results = await azguardClient.request('execute', executeParams)
     console.log('Deployment Results', results)
 
-    // TODO: Need to check if it's the case that For Azguard, we need to compute the contract address since it's not returned directly
-    const computedAddress = await computeContractAddress(account)
-    // if (computedAddress) {
-    //   setContractAddress(computedAddress)
-    //   setDeployStatus({
-    //     success: true,
-    //     error: false,
-    //     txHash: 'Transaction submitted via Azguard',
-    //   })
-    //   toast.success('Contract deployed successfully!')
-    // }
+    if (Array.isArray(results) && results.every((result: any) => result.status === 'ok')) {
+      // Extract transaction hash from the result
+      const deploymentResult = results.find((result: any) => result.result)
+      const txHash = deploymentResult?.result || 'Transaction submitted via Azguard'
+
+      if (txHash) {
+        // setContractAddress("")
+        setDeployStatus({
+          success: true,
+          error: false,
+          txHash: txHash,
+        })
+      }
+    } else {
+      throw new Error('Deployment failed - not all operations completed successfully')
+    }
   }
 
   const handleCastVote = async () => {
