@@ -250,16 +250,22 @@ export default function Home() {
       return
     }
 
-    const executeParams = await getDeployContractBatchCallsForAlreadyRegistered({
+    const {
+      sessionId,
+      operations,
+      contractAddress: deployedContractAddress,
+    } = await getDeployContractBatchCallsForAlreadyRegistered({
       account: azguardAccount,
       address: walletAddress,
       sessionId: azguardSessionId,
     })
+
+    const executeParams = { sessionId, operations }
     console.log('Execute Params for Deployment', executeParams)
+    console.log('Contract address to be deployed:', deployedContractAddress.toString())
+
     const results = await azguardClient.request('execute', executeParams as any)
     console.log('Deployment Results', results)
-    {
-    }
 
     if (Array.isArray(results) && results.every((result) => result.status === 'ok')) {
       // Extract transaction hash from the result
@@ -267,12 +273,13 @@ export default function Home() {
       const txHash = (deploymentResult?.result as string) || 'Transaction submitted via Azguard'
 
       if (txHash) {
-        // setContractAddress("")
+        setContractAddress(deployedContractAddress)
         setDeployStatus({
           success: true,
           error: false,
           txHash: txHash,
         })
+        toast.success('Contract deployed successfully!')
       }
     } else {
       throw new Error('Deployment failed - not all operations completed successfully')

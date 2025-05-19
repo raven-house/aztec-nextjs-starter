@@ -32,6 +32,7 @@ export const getDeployContractBatchCallsForAlreadyRegistered = async ({
     salt: Fr.random(),
   })
   const { salt, currentContractClassId, initializationHash, publicKeys } = instance
+  const contractAddress = instance.address
 
   console.log('currentContractClassId', currentContractClassId.toString())
   const operations = [
@@ -39,7 +40,7 @@ export const getDeployContractBatchCallsForAlreadyRegistered = async ({
       // here we register the contract in PXE, so PXE can interact with it
       kind: 'register_contract',
       chain,
-      address: instance.address,
+      address: contractAddress,
       instance,
       artifact,
     },
@@ -57,7 +58,7 @@ export const getDeployContractBatchCallsForAlreadyRegistered = async ({
         {
           // here we initialize the contract
           kind: 'call',
-          contract: instance.address,
+          contract: contractAddress,
           method: 'constructor',
           args: constructorArgs,
         },
@@ -65,5 +66,5 @@ export const getDeployContractBatchCallsForAlreadyRegistered = async ({
     },
   ]
 
-  return { sessionId, operations }
+  return { sessionId, operations, contractAddress }
 }
