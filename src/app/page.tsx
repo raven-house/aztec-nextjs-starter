@@ -352,27 +352,47 @@ export default function Home() {
       toast.error('Azguard client is not initialized')
       return
     }
-    const executeParams = {
-      sessionId: azguardSessionId,
-      operations: [
-        {
-          kind: 'send_transaction',
-          account: azguardAccount,
-          actions: [
-            {
-              kind: 'call',
-              contract: contractAddress,
-              method: 'cast_vote',
-              args: [1],
-            },
-          ],
-        },
-      ],
+
+    setIsCastingVote(true)
+
+    try {
+      const executeParams = {
+        sessionId: azguardSessionId,
+        operations: [
+          {
+            kind: 'send_transaction',
+            account: azguardAccount,
+            actions: [
+              {
+                kind: 'call',
+                contract: contractAddress,
+                method: 'cast_vote',
+                args: [1],
+              },
+            ],
+          },
+        ],
+      }
+
+      const results = await azguardClient.request('execute', executeParams as any)
+      console.log('Cast vote results:', results)
+
+      if (Array.isArray(results) && results.length > 0 && results[0].status === 'ok') {
+        const txHash = results[0].result
+        console.log('Vote cast transaction:', txHash)
+
+        toast.success('Vote cast successfully!')
+
+        await handleUnifiedCheckVotes()
+      } else {
+        throw new Error('Transaction failed - unexpected response from Azguard')
+      }
+    } catch (err) {
+      console.error('Error casting vote:', err)
+      toast.error('Failed to cast vote')
+    } finally {
+      setIsCastingVote(false)
     }
-
-    const results = await azguardClient.request('execute', executeParams as any)
-
-    console.log('results', results)
   }
 
   const handleEndVoteFromAzguard = async () => {
@@ -380,27 +400,46 @@ export default function Home() {
       toast.error('Azguard client is not initialized')
       return
     }
-    const executeParams = {
-      sessionId: azguardSessionId,
-      operations: [
-        {
-          kind: 'send_transaction',
-          account: azguardAccount,
-          actions: [
-            {
-              kind: 'call',
-              contract: contractAddress,
-              method: 'end_vote',
-              args: [],
-            },
-          ],
-        },
-      ],
+
+    setIsEndingVote(true)
+
+    try {
+      const executeParams = {
+        sessionId: azguardSessionId,
+        operations: [
+          {
+            kind: 'send_transaction',
+            account: azguardAccount,
+            actions: [
+              {
+                kind: 'call',
+                contract: contractAddress,
+                method: 'end_vote',
+                args: [],
+              },
+            ],
+          },
+        ],
+      }
+
+      const results = await azguardClient.request('execute', executeParams as any)
+      console.log('End vote results:', results)
+
+      if (Array.isArray(results) && results.length > 0 && results[0].status === 'ok') {
+        const txHash = results[0].result
+        console.log('End vote transaction:', txHash)
+
+        setIsVoteEnded(true)
+        toast.success('Voting has ended successfully')
+      } else {
+        throw new Error('Transaction failed - unexpected response from Azguard')
+      }
+    } catch (err) {
+      console.error('Error ending vote:', err)
+      toast.error('Failed to end voting')
+    } finally {
+      setIsEndingVote(false)
     }
-
-    const results = await azguardClient.request('execute', executeParams as any)
-
-    console.log('results', results)
   }
 
   const handleCheckVotesFromAzguard = async () => {
@@ -408,21 +447,41 @@ export default function Home() {
       toast.error('Azguard client is not initialized')
       return
     }
-    const executeParams = {
-      sessionId: azguardSessionId,
-      operations: [
-        {
-          kind: 'simulate_utility',
-          account: azguardAccount,
-          contract: contractAddress,
-          method: 'get_vote',
-          args: [1],
-        },
-      ],
-    }
 
-    const results = await azguardClient.request('execute', executeParams as any)
-    console.log('results', results)
+    setIsCheckingVotes(true)
+
+    try {
+      const executeParams = {
+        sessionId: azguardSessionId,
+        operations: [
+          {
+            kind: 'simulate_utility',
+            account: azguardAccount,
+            contract: contractAddress,
+            method: 'get_vote',
+            args: [1],
+          },
+        ],
+      }
+
+      const results = await azguardClient.request('execute', executeParams as any)
+      console.log('Check votes results:', results)
+
+      if (Array.isArray(results) && results.length > 0 && results[0].status === 'ok') {
+        const count = results[0].result
+        const voteCountNumber = Number(count)
+
+        setVoteCount(voteCountNumber)
+        toast.success(`Current vote count for option 1: ${voteCountNumber}`)
+      } else {
+        throw new Error('Simulation failed - unexpected response from Azguard')
+      }
+    } catch (err) {
+      console.error('Error checking votes:', err)
+      toast.error('Failed to check votes')
+    } finally {
+      setIsCheckingVotes(false)
+    }
   }
 
   const handleUnifiedCastVote = async () => {
