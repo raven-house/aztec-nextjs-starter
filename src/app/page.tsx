@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { getContractInstanceFromDeployParams, Fr, AztecAddress } from '@aztec/aztec.js'
 import { NodeInfo } from '@/components/NodeInfo'
-import { getDeployContractBatchCalls } from '@/components/register-contract-obsidion'
+import { getDeployContractBatchCalls } from '@/components/register-contract-azguard'
 import { getDeployContractBatchCallsForAlreadyRegistered } from '@/components/deploy-already-registered'
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
