@@ -21,12 +21,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { getContractInstanceFromDeployParams, Fr, AztecAddress } from '@aztec/aztec.js'
 import { NodeInfo } from '@/components/NodeInfo'
+import { getDeployContractBatchCalls } from '@/components/register-contract-obsidion'
+import { getDeployContractBatchCallsForAlreadyRegistered } from '@/components/deploy-already-registered'
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
 
 class EasyPrivateVoting extends Contract.fromAztec(EasyPrivateVotingContract) {}
 export default function Home() {
-  const { walletAddress } = useContext(GlobalContext)
+  const { walletAddress, walletName, azguardAccount, azguardSessionId, azguardClient } =
+    useContext(GlobalContext)
   const account = useAccount(sdk)
   const [isDeploying, setIsDeploying] = useState(false)
   const [deployStatus, setDeployStatus] = useState({ success: false, error: false, txHash: '' })
@@ -128,7 +131,7 @@ export default function Home() {
     }
   }
 
-  const handleRegisterContract = async () => {
+  const handleRegisterContractObsidion = async () => {
     try {
       toast.info('Registering contract class...')
 
@@ -160,6 +163,31 @@ export default function Home() {
     } catch (error) {
       console.error('Registration error:', error)
       toast.error('Failed to register contract class')
+    }
+  }
+
+  const handleRegisterContractAzguard = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+
+    if (!azguardAccount || !azguardSessionId) {
+      toast.error('Azguard account not found')
+      return
+    }
+    try {
+      const executeParams = await getDeployContractBatchCallsForAlreadyRegistered({
+        account: azguardAccount,
+        address: walletAddress,
+        sessionId: azguardSessionId,
+      })
+      console.log('Execute  Params', executeParams)
+      const results = await azguardClient.request('execute', executeParams)
+      console.log('Results', results)
+    } catch (e) {
+      console.error('Error minting token: ', e)
+    } finally {
     }
   }
 
@@ -360,7 +388,7 @@ export default function Home() {
               <>
                 <Button
                   variant="outline"
-                  onClick={handleRegisterContract}
+                  onClick={handleRegisterContractAzguard}
                   className="flex-1"
                 >
                   Register Contract Class
