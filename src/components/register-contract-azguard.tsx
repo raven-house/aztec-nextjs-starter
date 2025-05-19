@@ -12,9 +12,6 @@ import { EasyPrivateVotingContractArtifact } from '@/artifacts/EasyPrivateVoting
 const classRegisterer = AztecAddress.fromNumber(REGISTERER_CONTRACT_ADDRESS)
 const capsuleStorageSlot = new Fr(REGISTERER_CONTRACT_BYTECODE_CAPSULE_SLOT)
 
-const { artifactHash, privateFunctionsRoot, publicBytecodeCommitment, packedBytecode } =
-  await getContractClassFromArtifact(EasyPrivateVotingContractArtifact)
-
 export const getDeployContractBatchCalls = async ({
   account,
   sessionId,
@@ -22,6 +19,9 @@ export const getDeployContractBatchCalls = async ({
   account: any
   sessionId: string
 }) => {
+  const { artifactHash, privateFunctionsRoot, publicBytecodeCommitment, packedBytecode } =
+    await getContractClassFromArtifact(EasyPrivateVotingContractArtifact)
+
   const encodedBytecode = bufferAsFields(packedBytecode, MAX_PACKED_PUBLIC_BYTECODE_SIZE_IN_FIELDS)
 
   const operations = [

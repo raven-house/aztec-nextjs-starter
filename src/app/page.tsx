@@ -23,6 +23,7 @@ import { getContractInstanceFromDeployParams, Fr, AztecAddress } from '@aztec/az
 import { NodeInfo } from '@/components/NodeInfo'
 import { getDeployContractBatchCalls } from '@/components/register-contract-azguard'
 import { getDeployContractBatchCallsForAlreadyRegistered } from '@/components/deploy-already-registered'
+import { OkResult } from '@azguardwallet/types'
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
 
@@ -224,11 +225,10 @@ export default function Home() {
 
     const executeParams = await getDeployContractBatchCalls({
       account: azguardAccount,
-      address: walletAddress,
       sessionId: azguardSessionId,
     })
     console.log('Execute Params for Registration', executeParams)
-    const results = await azguardClient.request('execute', executeParams)
+    const results = await azguardClient.request('execute', executeParams as any)
     console.log('Registration Results', results)
 
     if (Array.isArray(results) && results.every((result: any) => result.status === 'ok')) {
@@ -256,13 +256,15 @@ export default function Home() {
       sessionId: azguardSessionId,
     })
     console.log('Execute Params for Deployment', executeParams)
-    const results = await azguardClient.request('execute', executeParams)
+    const results = await azguardClient.request('execute', executeParams as any)
     console.log('Deployment Results', results)
+    {
+    }
 
-    if (Array.isArray(results) && results.every((result: any) => result.status === 'ok')) {
+    if (Array.isArray(results) && results.every((result) => result.status === 'ok')) {
       // Extract transaction hash from the result
-      const deploymentResult = results.find((result: any) => result.result)
-      const txHash = deploymentResult?.result || 'Transaction submitted via Azguard'
+      const deploymentResult = results.find((result: OkResult<any>) => result.result)
+      const txHash = (deploymentResult?.result as string) || 'Transaction submitted via Azguard'
 
       if (txHash) {
         // setContractAddress("")
