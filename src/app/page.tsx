@@ -347,6 +347,114 @@ export default function Home() {
     }
   }
 
+  const handleCastVoteFromAzguard = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+    const executeParams = {
+      sessionId: azguardSessionId,
+      operations: [
+        {
+          kind: 'send_transaction',
+          account: azguardAccount,
+          actions: [
+            {
+              kind: 'call',
+              contract: contractAddress,
+              method: 'cast_vote',
+              args: [1],
+            },
+          ],
+        },
+      ],
+    }
+
+    const results = await azguardClient.request('execute', executeParams as any)
+
+    console.log('results', results)
+  }
+
+  const handleEndVoteFromAzguard = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+    const executeParams = {
+      sessionId: azguardSessionId,
+      operations: [
+        {
+          kind: 'send_transaction',
+          account: azguardAccount,
+          actions: [
+            {
+              kind: 'call',
+              contract: contractAddress,
+              method: 'end_vote',
+              args: [],
+            },
+          ],
+        },
+      ],
+    }
+
+    const results = await azguardClient.request('execute', executeParams as any)
+
+    console.log('results', results)
+  }
+
+  const handleCheckVotesFromAzguard = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+    const executeParams = {
+      sessionId: azguardSessionId,
+      operations: [
+        {
+          kind: 'simulate_utility',
+          account: azguardAccount,
+          contract: contractAddress,
+          method: 'get_vote',
+          args: [1],
+        },
+      ],
+    }
+
+    const results = await azguardClient.request('execute', executeParams as any)
+    console.log('results', results)
+  }
+
+  const handleUnifiedCastVote = async () => {
+    if (walletName === 'obsidion') {
+      await handleCastVote()
+    } else if (walletName === 'azguard') {
+      await handleCastVoteFromAzguard()
+    } else {
+      toast.error('Unsupported wallet type')
+    }
+  }
+
+  const handleUnifiedCheckVotes = async () => {
+    if (walletName === 'obsidion') {
+      await handleCheckVotes()
+    } else if (walletName === 'azguard') {
+      await handleCheckVotesFromAzguard()
+    } else {
+      toast.error('Unsupported wallet type')
+    }
+  }
+
+  const handleUnifiedEndVote = async () => {
+    if (walletName === 'obsidion') {
+      await handleEndVote()
+    } else if (walletName === 'azguard') {
+      await handleEndVoteFromAzguard()
+    } else {
+      toast.error('Unsupported wallet type')
+    }
+  }
+
   if (!walletAddress) {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
@@ -520,7 +628,7 @@ export default function Home() {
             ) : (
               <>
                 <Button
-                  onClick={handleCastVote}
+                  onClick={handleUnifiedCastVote}
                   disabled={isCastingVote || isVoteEnded}
                   className="flex-1"
                 >
@@ -536,7 +644,7 @@ export default function Home() {
 
                 <Button
                   variant="outline"
-                  onClick={handleCheckVotes}
+                  onClick={handleUnifiedCheckVotes}
                   disabled={isCheckingVotes}
                   className="flex-1"
                 >
@@ -552,7 +660,7 @@ export default function Home() {
 
                 <Button
                   variant="destructive"
-                  onClick={handleEndVote}
+                  onClick={handleUnifiedEndVote}
                   disabled={isEndingVote || isVoteEnded}
                   className="flex-1"
                 >
