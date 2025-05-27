@@ -1,5 +1,5 @@
 [package]
-name = "voting_contract"
+name = "crowdfunding_contract"
 type = "contract"
 authors = ["Satyam Bansal <satyamsgsits1994@gmail.com>"]
 compiler_version = ">=0.18.0"

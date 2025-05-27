@@ -21,14 +21,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { getContractInstanceFromDeployParams, Fr, AztecAddress } from '@aztec/aztec.js'
 import { NodeInfo } from '@/components/NodeInfo'
+import { getDeployContractBatchCalls } from '@/components/register-contract-azguard'
+import { getDeployContractBatchCallsForAlreadyRegistered } from '@/components/deploy-already-registered'
+import { OkResult } from '@azguardwallet/types'
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
 
 class EasyPrivateVoting extends Contract.fromAztec(EasyPrivateVotingContract) {}
+
 export default function Home() {
-  const { walletAddress } = useContext(GlobalContext)
+  const { walletAddress, walletName, azguardAccount, azguardSessionId, azguardClient } =
+    useContext(GlobalContext)
   const account = useAccount(sdk)
   const [isDeploying, setIsDeploying] = useState(false)
+  const [isRegistering, setIsRegistering] = useState(false)
   const [deployStatus, setDeployStatus] = useState({ success: false, error: false, txHash: '' })
   const [adminAddress, setAdminAddress] = useState('')
   const [adminAddressError, setAdminAddressError] = useState('')
@@ -73,10 +79,37 @@ export default function Home() {
     setAdminAddressError(validateAddress(value))
   }
 
-  const handleEasyVotingContractDeploy = async () => {
+  // Unified contract registration handler
+  const handleRegisterContract = async () => {
+    if (!walletName) {
+      toast.error('Please connect a wallet first')
+      return
+    }
+
+    setIsRegistering(true)
+    try {
+      if (walletName === 'obsidion') {
+        await handleRegisterContractObsidion()
+      } else if (walletName === 'azguard') {
+        await handleRegisterContractAzguard()
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      toast.error('Failed to register contract class')
+    } finally {
+      setIsRegistering(false)
+    }
+  }
+
+  const handleDeployContract = async () => {
     const error = validateAddress(adminAddress)
     if (error) {
       setAdminAddressError(error)
+      return
+    }
+
+    if (!walletName) {
+      toast.error('Please connect a wallet first')
       return
     }
 
@@ -84,37 +117,11 @@ export default function Home() {
     setDeployStatus({ success: false, error: false, txHash: '' })
 
     try {
-      const contractInstance = await getContractInstanceFromDeployParams(
-        EasyPrivateVotingContract.artifact,
-        {
-          salt: CONTRACT_ADDRESS_SALT,
-          constructorArgs: [account!.getAddress()],
-          deployer: account!.getAddress(),
-        }
-      )
-
-      console.log('Contract instance to be deployed', contractInstance.address.toString())
-
-      const deployTx = await EasyPrivateVoting.deployWithOpts(
-        {
-          account: account!,
-          skipClassRegistration: true,
-          publicKeys: contractInstance.publicKeys,
-          method: 'constructor',
-        },
-        account!.getAddress()
-      )
-        .send()
-        .wait({ timeout: 200000 })
-      console.log('deploy TX', deployTx)
-
-      setContractAddress(deployTx.contract.address)
-      setDeployStatus({
-        success: true,
-        error: false,
-        txHash: deployTx.txHash.toString() || 'Transaction submitted',
-      })
-      toast.success('Contract deployed successfully!')
+      if (walletName === 'obsidion') {
+        await handleObsidionDeploy()
+      } else if (walletName === 'azguard') {
+        await handleAzguardDeploy()
+      }
     } catch (error) {
       console.error('Deployment error:', error)
       setDeployStatus({
@@ -128,38 +135,154 @@ export default function Home() {
     }
   }
 
-  const handleRegisterContract = async () => {
-    try {
-      toast.info('Registering contract class...')
+  const handleRegisterContractObsidion = async () => {
+    if (!account) {
+      toast.error('Obsidion account not connected')
+      return
+    }
 
-      const contractInstance = await getContractInstanceFromDeployParams(
-        EasyPrivateVotingContract.artifact,
-        {
-          salt: CONTRACT_ADDRESS_SALT,
-          constructorArgs: [account!.getAddress()],
-          deployer: account!.getAddress(),
-        }
-      )
-      console.log('Contract address to be registered', contractInstance.address.toString())
+    toast.info('Registering contract class...')
 
-      const txn = await account
-        ?.sendTransaction({
-          calls: [],
-          registerContracts: [
-            {
-              address: contractInstance.address,
-              instance: contractInstance,
-              artifact: EasyPrivateVoting.artifact,
-            },
-          ],
-        })
-        .wait()
-      console.log('Register contract call', txn?.txHash.toString())
+    const contractInstance = await getContractInstanceFromDeployParams(
+      EasyPrivateVotingContract.artifact,
+      {
+        salt: CONTRACT_ADDRESS_SALT,
+        constructorArgs: [account.getAddress()],
+        deployer: account.getAddress(),
+      }
+    )
+    console.log('Contract address to be registered', contractInstance.address.toString())
 
+    const txn = await account
+      ?.sendTransaction({
+        calls: [],
+        registerContracts: [
+          {
+            address: contractInstance.address,
+            instance: contractInstance,
+            artifact: EasyPrivateVoting.artifact,
+          },
+        ],
+      })
+      .wait()
+    console.log('Register contract call', txn?.txHash.toString())
+
+    toast.success('Contract class registered successfully')
+  }
+
+  const handleObsidionDeploy = async () => {
+    if (!account) {
+      toast.error('Obsidion account not connected')
+      return
+    }
+
+    const contractInstance = await getContractInstanceFromDeployParams(
+      EasyPrivateVotingContract.artifact,
+      {
+        salt: CONTRACT_ADDRESS_SALT,
+        constructorArgs: [account.getAddress()],
+        deployer: account.getAddress(),
+      }
+    )
+
+    console.log('Contract instance to be deployed', contractInstance.address.toString())
+
+    const deployTx = await EasyPrivateVoting.deployWithOpts(
+      {
+        account: account,
+        skipClassRegistration: true,
+        publicKeys: contractInstance.publicKeys,
+        method: 'constructor',
+      },
+      account.getAddress()
+    )
+      .send()
+      .wait({ timeout: 200000 })
+    console.log('deploy TX', deployTx)
+
+    setContractAddress(deployTx.contract.address)
+    setDeployStatus({
+      success: true,
+      error: false,
+      txHash: deployTx.txHash.toString() || 'Transaction submitted',
+    })
+    toast.success('Contract deployed successfully!')
+  }
+
+  // Azguard specific registration
+  const handleRegisterContractAzguard = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+
+    if (!azguardAccount || !azguardSessionId) {
+      toast.error('Azguard account not found')
+      return
+    }
+
+    toast.info('Registering contract class...')
+
+    const executeParams = await getDeployContractBatchCalls({
+      account: azguardAccount,
+      sessionId: azguardSessionId,
+    })
+    console.log('Execute Params for Registration', executeParams)
+    const results = await azguardClient.request('execute', executeParams as any)
+    console.log('Registration Results', results)
+
+    if (Array.isArray(results) && results.every((result: any) => result.status === 'ok')) {
       toast.success('Contract class registered successfully')
-    } catch (error) {
-      console.error('Registration error:', error)
-      toast.error('Failed to register contract class')
+    } else {
+      throw new Error('Registration failed - not all operations completed successfully')
+    }
+  }
+
+  // Azguard specific deployment
+  const handleAzguardDeploy = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+
+    if (!azguardAccount || !azguardSessionId) {
+      toast.error('Azguard account not found')
+      return
+    }
+
+    const {
+      sessionId,
+      operations,
+      contractAddress: deployedContractAddress,
+    } = await getDeployContractBatchCallsForAlreadyRegistered({
+      account: azguardAccount,
+      address: walletAddress,
+      sessionId: azguardSessionId,
+    })
+
+    const executeParams = { sessionId, operations }
+    console.log('Execute Params for Deployment', executeParams)
+    console.log('Contract address to be deployed:', deployedContractAddress.toString())
+
+    const results = await azguardClient.request('execute', executeParams as any)
+    console.log('Deployment Results', results)
+
+    if (Array.isArray(results) && results.every((result) => result.status === 'ok')) {
+      // Extract transaction hash from the result
+      const deploymentResult = results.find((result: OkResult<any>) => result.result)
+      const txHash = (deploymentResult?.result as string) || 'Transaction submitted via Azguard'
+
+      if (txHash) {
+        setContractAddress(deployedContractAddress)
+        setDeployStatus({
+          success: true,
+          error: false,
+          txHash: txHash,
+        })
+        toast.success('Contract deployed successfully!')
+      }
+    } else {
+      throw new Error('Deployment failed - not all operations completed successfully')
     }
   }
 
@@ -224,6 +347,173 @@ export default function Home() {
     }
   }
 
+  const handleCastVoteFromAzguard = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+
+    setIsCastingVote(true)
+
+    try {
+      const executeParams = {
+        sessionId: azguardSessionId,
+        operations: [
+          {
+            kind: 'send_transaction',
+            account: azguardAccount,
+            actions: [
+              {
+                kind: 'call',
+                contract: contractAddress,
+                method: 'cast_vote',
+                args: [1],
+              },
+            ],
+          },
+        ],
+      }
+
+      const results = await azguardClient.request('execute', executeParams as any)
+      console.log('Cast vote results:', results)
+
+      if (Array.isArray(results) && results.length > 0 && results[0].status === 'ok') {
+        const txHash = results[0].result
+        console.log('Vote cast transaction:', txHash)
+
+        toast.success('Vote cast successfully!')
+
+        await handleUnifiedCheckVotes()
+      } else {
+        throw new Error('Transaction failed - unexpected response from Azguard')
+      }
+    } catch (err) {
+      console.error('Error casting vote:', err)
+      toast.error('Failed to cast vote')
+    } finally {
+      setIsCastingVote(false)
+    }
+  }
+
+  const handleEndVoteFromAzguard = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+
+    setIsEndingVote(true)
+
+    try {
+      const executeParams = {
+        sessionId: azguardSessionId,
+        operations: [
+          {
+            kind: 'send_transaction',
+            account: azguardAccount,
+            actions: [
+              {
+                kind: 'call',
+                contract: contractAddress,
+                method: 'end_vote',
+                args: [],
+              },
+            ],
+          },
+        ],
+      }
+
+      const results = await azguardClient.request('execute', executeParams as any)
+      console.log('End vote results:', results)
+
+      if (Array.isArray(results) && results.length > 0 && results[0].status === 'ok') {
+        const txHash = results[0].result
+        console.log('End vote transaction:', txHash)
+
+        setIsVoteEnded(true)
+        toast.success('Voting has ended successfully')
+      } else {
+        throw new Error('Transaction failed - unexpected response from Azguard')
+      }
+    } catch (err) {
+      console.error('Error ending vote:', err)
+      toast.error('Failed to end voting')
+    } finally {
+      setIsEndingVote(false)
+    }
+  }
+
+  const handleCheckVotesFromAzguard = async () => {
+    if (!azguardClient) {
+      toast.error('Azguard client is not initialized')
+      return
+    }
+
+    setIsCheckingVotes(true)
+
+    try {
+      const executeParams = {
+        sessionId: azguardSessionId,
+        operations: [
+          {
+            kind: 'simulate_utility',
+            account: azguardAccount,
+            contract: contractAddress,
+            method: 'get_vote',
+            args: [1],
+          },
+        ],
+      }
+
+      const results = await azguardClient.request('execute', executeParams as any)
+      console.log('Check votes results:', results)
+
+      if (Array.isArray(results) && results.length > 0 && results[0].status === 'ok') {
+        const count = results[0].result
+        const voteCountNumber = Number(count)
+
+        setVoteCount(voteCountNumber)
+        toast.success(`Current vote count for option 1: ${voteCountNumber}`)
+      } else {
+        throw new Error('Simulation failed - unexpected response from Azguard')
+      }
+    } catch (err) {
+      console.error('Error checking votes:', err)
+      toast.error('Failed to check votes')
+    } finally {
+      setIsCheckingVotes(false)
+    }
+  }
+
+  const handleUnifiedCastVote = async () => {
+    if (walletName === 'obsidion') {
+      await handleCastVote()
+    } else if (walletName === 'azguard') {
+      await handleCastVoteFromAzguard()
+    } else {
+      toast.error('Unsupported wallet type')
+    }
+  }
+
+  const handleUnifiedCheckVotes = async () => {
+    if (walletName === 'obsidion') {
+      await handleCheckVotes()
+    } else if (walletName === 'azguard') {
+      await handleCheckVotesFromAzguard()
+    } else {
+      toast.error('Unsupported wallet type')
+    }
+  }
+
+  const handleUnifiedEndVote = async () => {
+    if (walletName === 'obsidion') {
+      await handleEndVote()
+    } else if (walletName === 'azguard') {
+      await handleEndVoteFromAzguard()
+    } else {
+      toast.error('Unsupported wallet type')
+    }
+  }
+
   if (!walletAddress) {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
@@ -274,7 +564,12 @@ export default function Home() {
             <div className="p-4 rounded-lg border border-border bg-secondary/10">
               <div className="flex flex-col space-y-1">
                 <span className="text-sm font-medium text-muted-foreground">Connected Wallet</span>
-                <span className="font-mono text-sm text-foreground">{walletAddress}</span>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-sm text-foreground">{walletAddress}</span>
+                  <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded capitalize">
+                    {walletName}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -361,14 +656,22 @@ export default function Home() {
                 <Button
                   variant="outline"
                   onClick={handleRegisterContract}
+                  disabled={isRegistering}
                   className="flex-1"
                 >
-                  Register Contract Class
+                  {isRegistering ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Registering...
+                    </>
+                  ) : (
+                    'Register Contract Class'
+                  )}
                 </Button>
                 <Button
                   size="lg"
                   className="flex-1"
-                  onClick={handleEasyVotingContractDeploy}
+                  onClick={handleDeployContract}
                   disabled={isDeploying}
                 >
                   {isDeploying ? (
@@ -384,7 +687,7 @@ export default function Home() {
             ) : (
               <>
                 <Button
-                  onClick={handleCastVote}
+                  onClick={handleUnifiedCastVote}
                   disabled={isCastingVote || isVoteEnded}
                   className="flex-1"
                 >
@@ -400,7 +703,7 @@ export default function Home() {
 
                 <Button
                   variant="outline"
-                  onClick={handleCheckVotes}
+                  onClick={handleUnifiedCheckVotes}
                   disabled={isCheckingVotes}
                   className="flex-1"
                 >
@@ -416,7 +719,7 @@ export default function Home() {
 
                 <Button
                   variant="destructive"
-                  onClick={handleEndVote}
+                  onClick={handleUnifiedEndVote}
                   disabled={isEndingVote || isVoteEnded}
                   className="flex-1"
                 >
