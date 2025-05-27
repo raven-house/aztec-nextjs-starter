@@ -33,7 +33,7 @@ import {
   type U128Like,
   type WrappedFieldLike,
 } from '@aztec/aztec.js'
-import CrowdfundingContractArtifactJson from '../../circuits/target/voting_contract-Crowdfunding.json' assert { type: 'json' }
+import CrowdfundingContractArtifactJson from '../../circuits/target/crowdfunding_contract-Crowdfunding.json' assert { type: 'json' }
 export const CrowdfundingContractArtifact = loadContractArtifact(
   CrowdfundingContractArtifactJson as NoirCompiledContract
 )

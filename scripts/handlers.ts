@@ -7,6 +7,7 @@ import {
   setupWallets,
 } from './utils'
 import { Logger } from '@/lib/Logger'
+import chalk from 'chalk'
 
 export const testCrowdfundingDeploy = async (pxe: PXE) => {
   const wallets = await setupWallets(pxe)
@@ -39,4 +40,8 @@ export const testCrowdfundingDeploy = async (pxe: PXE) => {
     .send({ authWitnesses: [authwit] })
     .wait()
   Logger.success(`Donate txn hash`, donateTxn.txHash.toString())
+  await crowdfundingContract.withWallet(wallets.user2).methods.sync_notes().simulate()
+  const notes = await pxe.getNotes({ txHash: donateTxn.txHash })
+  const filteredNotes = notes.filter((x) => x.contractAddress.equals(crowdfundingContract.address))
+  console.log(chalk.whiteBright('Filtered Notes', filteredNotes))
 }
