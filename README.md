@@ -18,7 +18,7 @@ This starter repository provides a foundation for developing decentralized appli
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - NPM or Yarn
 - Access to Aztec Network (Testnet or Local Sandbox)
 - Azguard and/or Obsidion wallet extensions installed in your browser
