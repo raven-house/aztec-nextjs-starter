@@ -125,17 +125,6 @@ MIT
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
----
-
-Happy building with Aztec Network! 🔐✨
-This content is now properly formatted with:
-
-Correct heading levels
-Consistent bullet point styling
-Proper spacing between sections
-Correctly formatted code blocks
-Links in the Resources section
-
 
 
 
