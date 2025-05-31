@@ -213,7 +213,7 @@ export const createAuthWit = async (
   }
 }
 
-export function processUniqueNote(uniqueNote: UniqueNote) {
+export const processUniqueNote = (uniqueNote: UniqueNote) => {
   return {
     note: {
       owner: AztecAddress.fromField(uniqueNote.note.items[0]),

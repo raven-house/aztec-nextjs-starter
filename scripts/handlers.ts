@@ -4,6 +4,7 @@ import {
   deployContracts,
   getNumericInput,
   mintPrivateTokensToWallet,
+  processUniqueNote,
   setupWallets,
 } from './utils'
 import { Logger } from '@/lib/Logger'
@@ -44,4 +45,8 @@ export const testCrowdfundingDeploy = async (pxe: PXE) => {
   const notes = await pxe.getNotes({ txHash: donateTxn.txHash })
   const filteredNotes = notes.filter((x) => x.contractAddress.equals(crowdfundingContract.address))
   console.log(chalk.whiteBright('Filtered Notes', filteredNotes))
+  if (filteredNotes.length > 0) {
+    const uintNote = processUniqueNote(filteredNotes[0])
+    console.log(uintNote)
+  }
 }
