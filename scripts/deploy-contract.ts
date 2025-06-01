@@ -21,6 +21,8 @@ export const setupSandbox = async () => {
   return pxe
 }
 
+
+
 // const aztecNode = createAztecNodeClient(PXE_URL)
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('11')

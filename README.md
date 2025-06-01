@@ -43,6 +43,34 @@ npm run dev
 yarn dev
 ```
 
+## Contract setup
+
+# Commands
+
+Install All dependencies
+
+```bash
+aztec-nargo build
+```
+
+Compile contracts
+
+```bash
+aztec-nargo compile
+```
+
+Generate contract artifacts
+
+```bash
+aztec codegen -o ../src/artifacts target --force
+```
+
+Run test cases(Trixie)
+
+```bash
+aztec test
+```
+
 
 **NOTE:** You need to register your contract first using script `bun run register-contract` before trying deployment using Obsidion wallet.
 
