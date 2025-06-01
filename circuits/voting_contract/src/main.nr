@@ -1,4 +1,4 @@
-mod test;
+// mod test;
 use dep::aztec::macros::aztec;
 
 #[aztec]

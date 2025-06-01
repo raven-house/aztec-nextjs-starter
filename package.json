@@ -28,11 +28,11 @@
   "dependencies": {
     "@azguardwallet/client": "^0.4.2",
     "@azguardwallet/types": "^0.4.1",
-    "@aztec/accounts": "0.85.0-alpha-testnet.2",
-    "@aztec/aztec.js": "0.85.0-alpha-testnet.2",
+    "@aztec/accounts": "0.87.2",
+    "@aztec/aztec.js": "0.87.2",
     "@aztec/bb.js": "^0.85.0",
-    "@aztec/noir-contracts.js": "0.85.0-alpha-testnet.2",
-    "@nemi-fi/wallet-sdk": "0.85.0-next.5",
+    "@aztec/noir-contracts.js": "0.87.2",
+    "@nemi-fi/wallet-sdk": "0.87.2-next.1",
     "@noir-lang/acvm_js": "^1.0.0-beta.3",
     "@noir-lang/noir_js": "^1.0.0-beta.3",
     "@noir-lang/noir_wasm": "^1.0.0-beta.3",
@@ -67,8 +67,12 @@
     "eslint": "^8.50.0",
     "eslint-config-next": "^13.5.4",
     "postcss": "^8.5.3",
+    "semver": "^7.7.2",
     "tailwindcss": "^4.1.4",
     "tw-animate-css": "^1.2.7",
     "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
