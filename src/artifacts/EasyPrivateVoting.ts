@@ -34,7 +34,7 @@ import {
   type U128Like,
   type WrappedFieldLike,
 } from '@aztec/aztec.js';
-import EasyPrivateVotingContractArtifactJson from '../../circuits/voting_contract/target/voting_contract-EasyPrivateVoting.json' assert { type: 'json' };
+import EasyPrivateVotingContractArtifactJson from '../../circuits/voting_contract/target/voting_contract-EasyPrivateVoting.json' with { type: 'json' };
 export const EasyPrivateVotingContractArtifact = loadContractArtifact(EasyPrivateVotingContractArtifactJson as NoirCompiledContract);
 
 
@@ -43,16 +43,16 @@ export const EasyPrivateVotingContractArtifact = loadContractArtifact(EasyPrivat
  * Type-safe interface for contract EasyPrivateVoting;
  */
 export class EasyPrivateVotingContract extends ContractBase {
-
+  
   private constructor(
     instance: ContractInstanceWithAddress,
     wallet: Wallet,
   ) {
     super(instance, EasyPrivateVotingContractArtifact, wallet);
   }
+  
 
-
-
+  
   /**
    * Creates a contract instance.
    * @param address - The deployed contract's address.
@@ -66,7 +66,7 @@ export class EasyPrivateVotingContract extends ContractBase {
     return Contract.at(address, EasyPrivateVotingContract.artifact, wallet) as Promise<EasyPrivateVotingContract>;
   }
 
-
+  
   /**
    * Creates a tx to deploy a new instance of this contract.
    */
@@ -97,9 +97,9 @@ export class EasyPrivateVotingContract extends ContractBase {
       opts.method ?? 'constructor',
     );
   }
+  
 
-
-
+  
   /**
    * Returns this contract's artifact.
    */
@@ -113,31 +113,31 @@ export class EasyPrivateVotingContract extends ContractBase {
   public static get artifactForPublic(): ContractArtifact {
     return loadContractArtifactForPublic(EasyPrivateVotingContractArtifactJson as NoirCompiledContract);
   }
-
+  
 
   public static get storage(): ContractStorageLayout<'admin' | 'tally' | 'vote_ended' | 'active_at_block'> {
-    return {
-      admin: {
-        slot: new Fr(1n),
-      },
-      tally: {
-        slot: new Fr(2n),
-      },
-      vote_ended: {
-        slot: new Fr(3n),
-      },
-      active_at_block: {
-        slot: new Fr(4n),
-      }
-    } as ContractStorageLayout<'admin' | 'tally' | 'vote_ended' | 'active_at_block'>;
-  }
+      return {
+        admin: {
+      slot: new Fr(1n),
+    },
+tally: {
+      slot: new Fr(2n),
+    },
+vote_ended: {
+      slot: new Fr(3n),
+    },
+active_at_block: {
+      slot: new Fr(4n),
+    }
+      } as ContractStorageLayout<'admin' | 'tally' | 'vote_ended' | 'active_at_block'>;
+    }
+    
 
-
-
+  
 
   /** Type-safe wrappers for the public methods exposed by the contract. */
   public declare methods: {
-
+    
     /** cast_vote(candidate: field) */
     cast_vote: ((candidate: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
@@ -153,9 +153,9 @@ export class EasyPrivateVotingContract extends ContractBase {
     /** public_dispatch(selector: field) */
     public_dispatch: ((selector: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
-    /** sync_notes() */
-    sync_notes: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** sync_private_state() */
+    sync_private_state: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
   };
 
-
+  
 }

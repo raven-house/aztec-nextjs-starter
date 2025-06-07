@@ -86,7 +86,6 @@ async function main() {
     .balance_of_private(thirdWallet.getAddress())
     .simulate()
   console.log(chalk.greenBright('Third wallet updated private balance: ', thirdWalletBalance))
-  await crowdfundingContract.withWallet(thirdWallet).methods.sync_notes().simulate()
   const notes = await pxe.getNotes({ txHash: donateTxn.txHash })
   const filteredNotes = notes.filter((x) => x.contractAddress.equals(crowdfundingContract.address))
   console.log(chalk.whiteBright('Filtered Notes', filteredNotes))

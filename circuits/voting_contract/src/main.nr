@@ -35,6 +35,7 @@ pub contract EasyPrivateVoting {
         let new_tally = storage.tally.at(candidate).read() + 1;
         storage.tally.at(candidate).write(new_tally);
     }
+    
     #[public]
     fn end_vote() {
         assert(storage.admin.read().eq(context.msg_sender()), "Only admin can end votes");
