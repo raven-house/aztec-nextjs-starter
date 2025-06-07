@@ -11,7 +11,6 @@ import { AzguardRpcClient, DappPermissions, DappMetadata } from '@azguardwallet/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Badge } from './ui/badge'
 import { GlobalContext } from '@/contexts/GlobalContext'
-import { createAztecNodeClient } from '@aztec/aztec.js'
 
 type BuildConnectionParamsType = {
   dappMetadata: DappMetadata
@@ -134,13 +133,9 @@ export const Header = () => {
     <div className="p-2">
       <div className="flex items-center justify-between">
         <div>Aztec Starter</div>
-        <Badge
-          variant="secondary"
-          className="px-4 py-2"
-        >
+        <Badge variant="secondary" className="px-4 py-2">
           {APP_MODE}
         </Badge>
-
         {azguardAddress || obsidionAddress ? (
           <WalletMenu
             accountAddress={azguardAddress || obsidionAddress}
@@ -148,20 +143,14 @@ export const Header = () => {
           />
         ) : (
           <>
-            <Button
-              onClick={() => setIsWalletDialogOpen(true)}
-              disabled={isConnecting}
-            >
+            <Button onClick={() => setIsWalletDialogOpen(true)} disabled={isConnecting}>
               <span className="relative z-10 flex items-center">
                 {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Connect Wallet
               </span>
             </Button>
 
-            <Dialog
-              open={isWalletDialogOpen}
-              onOpenChange={setIsWalletDialogOpen}
-            >
+            <Dialog open={isWalletDialogOpen} onOpenChange={setIsWalletDialogOpen}>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Connect Wallet</DialogTitle>

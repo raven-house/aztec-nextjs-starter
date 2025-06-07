@@ -24,6 +24,7 @@ import { NodeInfo } from '@/components/NodeInfo'
 import { getDeployContractBatchCalls } from '@/components/register-contract-azguard'
 import { getDeployContractBatchCallsForAlreadyRegistered } from '@/components/deploy-already-registered'
 import { OkResult } from '@azguardwallet/types'
+import { validateAddress } from '@/lib/utils'
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
 
@@ -50,10 +51,8 @@ export default function Home() {
       toast.error('Please connect wallet first')
       return null
     }
-
     try {
       const address = contractAddress || (await computeContractAddress(account))
-
       if (!address) {
         toast.error('Please deploy contract first')
         return null
@@ -65,12 +64,6 @@ export default function Home() {
       toast.error('Failed to connect to contract')
       return null
     }
-  }
-
-  const validateAddress = (address: string) => {
-    if (!address) return 'Admin address is required'
-    if (!address.startsWith('0x')) return 'Address must start with 0x'
-    return ''
   }
 
   const handleAdminAddressChange = (e: { target: { value: any } }) => {
@@ -85,7 +78,6 @@ export default function Home() {
       toast.error('Please connect a wallet first')
       return
     }
-
     setIsRegistering(true)
     try {
       if (walletName === 'obsidion') {
@@ -525,10 +517,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Alert
-              variant="destructive"
-              className="border-muted bg-secondary/20"
-            >
+            <Alert variant="destructive" className="border-muted bg-secondary/20">
               <AlertCircle className="h-4 w-4 text-primary" />
               <AlertTitle className="text-primary">Wallet Required</AlertTitle>
               <AlertDescription>

@@ -15,3 +15,8 @@ export function shortenAddress(address: string | null, startChars = 6, endChars 
 
   return `${addr.substring(0, startChars)}...${addr.substring(addr.length - endChars)}`
 }
+
+export const validateAddress = (address: string) => {
+  if (!address.startsWith('0x')) return 'Address must start with 0x'
+  return ''
+}

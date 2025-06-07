@@ -21,7 +21,6 @@ export default function WalletMenu({
   handleDisconnect: () => void
 }) {
   const [copied, setCopied] = useState(false)
-
   const handleCopy = () => {
     navigator.clipboard.writeText(accountAddress)
     setCopied(true)
@@ -31,10 +30,7 @@ export default function WalletMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="flex items-center gap-2"
-        >
+        <Button variant="outline" className="flex items-center gap-2">
           <Wallet className="h-4 w-4" />
           {shortenAddress(accountAddress)}
           <ChevronDown className="h-4 w-4" />
@@ -43,11 +39,7 @@ export default function WalletMenu({
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-
-        <DropdownMenuItem
-          onClick={handleCopy}
-          className="cursor-pointer"
-        >
+        <DropdownMenuItem onClick={handleCopy} className="cursor-pointer">
           {copied ? (
             <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
           ) : (
@@ -55,9 +47,7 @@ export default function WalletMenu({
           )}
           <span>Copy Address</span>
         </DropdownMenuItem>
-
         <DropdownMenuSeparator />
-
         <DropdownMenuItem
           onClick={handleDisconnect}
           className="cursor-pointer text-red-500 focus:text-red-500"

@@ -1,7 +1,6 @@
 import select from '@inquirer/select'
 import input from '@inquirer/input'
-import { testCrowdfundingDeploy, testIGetNotesContract } from './handlers'
-import { setupNode, setupSandbox } from './utils'
+import { setupNode, setupPXE } from './utils'
 import { PXE } from '@aztec/aztec.js'
 import { Logger } from '@/lib/Logger'
 
@@ -60,7 +59,7 @@ const handlers = {
 
 async function main() {
   try {
-    const pxe = await setupSandbox()
+    const pxe = await setupPXE()
     while (true) {
       const answer = await select<CliAction>({
         message: 'What would you like to do?',
