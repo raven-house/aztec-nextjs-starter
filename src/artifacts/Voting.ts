@@ -34,21 +34,21 @@ import {
   type U128Like,
   type WrappedFieldLike,
 } from '@aztec/aztec.js';
-import IGetNoteContractArtifactJson from '../../circuits/i_get_note/target/i_get_note-IGetNote.json' with { type: 'json' };
-export const IGetNoteContractArtifact = loadContractArtifact(IGetNoteContractArtifactJson as NoirCompiledContract);
+import VotingContractArtifactJson from '../../circuits/voting_contract/target/voting_contract-Voting.json' with { type: 'json' };
+export const VotingContractArtifact = loadContractArtifact(VotingContractArtifactJson as NoirCompiledContract);
 
 
 
 /**
- * Type-safe interface for contract IGetNote;
+ * Type-safe interface for contract Voting;
  */
-export class IGetNoteContract extends ContractBase {
+export class VotingContract extends ContractBase {
   
   private constructor(
     instance: ContractInstanceWithAddress,
     wallet: Wallet,
   ) {
-    super(instance, IGetNoteContractArtifact, wallet);
+    super(instance, VotingContractArtifact, wallet);
   }
   
 
@@ -63,36 +63,36 @@ export class IGetNoteContract extends ContractBase {
     address: AztecAddress,
     wallet: Wallet,
   ) {
-    return Contract.at(address, IGetNoteContract.artifact, wallet) as Promise<IGetNoteContract>;
+    return Contract.at(address, VotingContract.artifact, wallet) as Promise<VotingContract>;
   }
 
   
   /**
    * Creates a tx to deploy a new instance of this contract.
    */
-  public static deploy(wallet: Wallet, ) {
-    return new DeployMethod<IGetNoteContract>(PublicKeys.default(), wallet, IGetNoteContractArtifact, IGetNoteContract.at, Array.from(arguments).slice(1));
+  public static deploy(wallet: Wallet, admin: AztecAddressLike) {
+    return new DeployMethod<VotingContract>(PublicKeys.default(), wallet, VotingContractArtifact, VotingContract.at, Array.from(arguments).slice(1));
   }
 
   /**
    * Creates a tx to deploy a new instance of this contract using the specified public keys hash to derive the address.
    */
-  public static deployWithPublicKeys(publicKeys: PublicKeys, wallet: Wallet, ) {
-    return new DeployMethod<IGetNoteContract>(publicKeys, wallet, IGetNoteContractArtifact, IGetNoteContract.at, Array.from(arguments).slice(2));
+  public static deployWithPublicKeys(publicKeys: PublicKeys, wallet: Wallet, admin: AztecAddressLike) {
+    return new DeployMethod<VotingContract>(publicKeys, wallet, VotingContractArtifact, VotingContract.at, Array.from(arguments).slice(2));
   }
 
   /**
    * Creates a tx to deploy a new instance of this contract using the specified constructor method.
    */
-  public static deployWithOpts<M extends keyof IGetNoteContract['methods']>(
+  public static deployWithOpts<M extends keyof VotingContract['methods']>(
     opts: { publicKeys?: PublicKeys; method?: M; wallet: Wallet },
-    ...args: Parameters<IGetNoteContract['methods'][M]>
+    ...args: Parameters<VotingContract['methods'][M]>
   ) {
-    return new DeployMethod<IGetNoteContract>(
+    return new DeployMethod<VotingContract>(
       opts.publicKeys ?? PublicKeys.default(),
       opts.wallet,
-      IGetNoteContractArtifact,
-      IGetNoteContract.at,
+      VotingContractArtifact,
+      VotingContract.at,
       Array.from(arguments).slice(1),
       opts.method ?? 'constructor',
     );
@@ -104,46 +104,51 @@ export class IGetNoteContract extends ContractBase {
    * Returns this contract's artifact.
    */
   public static get artifact(): ContractArtifact {
-    return IGetNoteContractArtifact;
+    return VotingContractArtifact;
   }
 
   /**
    * Returns this contract's artifact with public bytecode.
    */
   public static get artifactForPublic(): ContractArtifact {
-    return loadContractArtifactForPublic(IGetNoteContractArtifactJson as NoirCompiledContract);
+    return loadContractArtifactForPublic(VotingContractArtifactJson as NoirCompiledContract);
   }
   
 
-  public static get storage(): ContractStorageLayout<'set'> {
+  public static get storage(): ContractStorageLayout<'admin' | 'tally' | 'vote_ended'> {
       return {
-        set: {
+        admin: {
       slot: new Fr(1n),
+    },
+tally: {
+      slot: new Fr(2n),
+    },
+vote_ended: {
+      slot: new Fr(3n),
     }
-      } as ContractStorageLayout<'set'>;
+      } as ContractStorageLayout<'admin' | 'tally' | 'vote_ended'>;
     }
     
 
-  public static get notes(): ContractNotes<'ValueNote'> {
-    return {
-      ValueNote: {
-          id: new NoteSelector(0),
-        }
-    } as ContractNotes<'ValueNote'>;
-  }
   
 
   /** Type-safe wrappers for the public methods exposed by the contract. */
   public declare methods: {
     
-    /** insert_note(value: field) */
-    insert_note: ((value: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** cast_vote(candidate: field) */
+    cast_vote: ((candidate: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** constructor(admin: struct) */
+    constructor: ((admin: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** end_vote() */
+    end_vote: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** get_vote(candidate: field) */
+    get_vote: ((candidate: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
     /** public_dispatch(selector: field) */
     public_dispatch: ((selector: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
-
-    /** read_note_values(comparator: integer, value: field) */
-    read_note_values: ((comparator: (bigint | number), value: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
     /** sync_private_state() */
     sync_private_state: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;

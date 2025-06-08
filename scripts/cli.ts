@@ -3,6 +3,7 @@ import input from '@inquirer/input'
 import { setupNode, setupPXE } from './utils'
 import { PXE } from '@aztec/aztec.js'
 import { Logger } from '@/lib/Logger'
+import { castVoteHandler, deployVotingContract, endVoteHandler, getVoteHandler } from './voting_contract_handlers'
 
 enum CliAction {
   DEPLOY_VOTING_CONTRACT = 'deploy_voting_contract',
@@ -44,16 +45,23 @@ const getNumericInput = async (message: string): Promise<number> => {
 const handlers = {
   [CliAction.DEPLOY_VOTING_CONTRACT]: async (pxe: PXE) => {
     //TODO: Deploy voting contract handler
-
+    await deployVotingContract(pxe)
   },
   [CliAction.CAST_VOTE]: async (pxe: PXE) => {
     //TODO: Cast Vote handler
+    const candidateId = await getNumericInput("Enter candidate id you want to vote");
+    const walletNo = await getNumericInput("Enter Wallet No");
+    await castVoteHandler(pxe, candidateId, walletNo);
   },
   [CliAction.GET_VOTE]: async (pxe: PXE) => {
     //TODO: Get vote handler
+    const candidateId = await getNumericInput("Enter candidate id you want fetch vote for");
+    await getVoteHandler(pxe, candidateId);
   },
   [CliAction.END_VOTE]: async (pxe: PXE) => {
     // end vote handler
+    const walletNo = await getNumericInput("Enter Wallet No");
+    await endVoteHandler(pxe, walletNo)
   },
 }
 
@@ -74,7 +82,6 @@ async function main() {
       const handler = handlers[answer]
       if (handler) {
         await handler(pxe)
-        break
       }
     }
   } catch (error) {

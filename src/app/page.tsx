@@ -24,9 +24,7 @@ import { NodeInfo } from '@/components/NodeInfo'
 import { getDeployContractBatchCalls } from '@/components/register-contract-azguard'
 import { getDeployContractBatchCallsForAlreadyRegistered } from '@/components/deploy-already-registered'
 import { OkResult } from '@azguardwallet/types'
-import { validateAddress } from '@/lib/utils'
-
-const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
+import { computeContractAddress, CONTRACT_ADDRESS_SALT, validateAddress } from '@/lib/utils'
 
 class EasyPrivateVoting extends Contract.fromAztec(EasyPrivateVotingContract) {}
 
@@ -439,7 +437,6 @@ export default function Home() {
       toast.error('Azguard client is not initialized')
       return
     }
-
     setIsCheckingVotes(true)
 
     try {
@@ -732,22 +729,4 @@ export default function Home() {
       </div>
     </div>
   )
-}
-
-const computeContractAddress = async (account: any) => {
-  try {
-    const contractInstance = await getContractInstanceFromDeployParams(
-      EasyPrivateVotingContract.artifact,
-      {
-        salt: CONTRACT_ADDRESS_SALT,
-        constructorArgs: [account.getAddress()],
-        deployer: account.getAddress(),
-      }
-    )
-
-    return contractInstance.address
-  } catch (err) {
-    console.error('Error computing contract address:', err)
-    return null
-  }
 }
