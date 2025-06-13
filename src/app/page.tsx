@@ -517,7 +517,10 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Alert variant="destructive" className="border-muted bg-secondary/20">
+            <Alert
+              variant="destructive"
+              className="border-muted bg-secondary/20"
+            >
               <AlertCircle className="h-4 w-4 text-primary" />
               <AlertTitle className="text-primary">Wallet Required</AlertTitle>
               <AlertDescription>
