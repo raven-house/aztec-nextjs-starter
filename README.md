@@ -19,7 +19,7 @@ This starter repository provides a foundation for developing decentralized appli
 ## Prerequisites
 
 - Node.js 22+
-- NPM or Yarn
+- NPM, Yarn, or Bun
 - Access to Aztec Network (Testnet or Local Sandbox)
 - Azguard and/or Obsidion wallet extensions installed in your browser
 
@@ -36,48 +36,62 @@ cd aztec-nextjs-starter
 npm install
 # or
 yarn install
+# or
+bun install
+```
 
+## Environment Setup
+
+Before running the development server, create a `.env.local` file in the root directory with the following variables:
+
+```
+NEXT_PUBLIC_TESTNET_NODE_URL=https://aztec-alpha-testnet-fullnode.zkv.xyz
+NEXT_PUBLIC_APP_MODE=SANDBOX # or TESTNET for testnet deployment
+```
+
+## Start Development Server
+
+```bash
 # Start the development server
 npm run dev
 # or
 yarn dev
+# or
+bun dev
 ```
 
-## Contract setup
+## Contract Setup
 
-# Commands
+Navigate to the voting contract directory before running contract commands:
 
-Install All dependencies
+```bash
+cd circuits/voting_contract
+```
+
+### Contract Commands
+
+Install all dependencies:
 
 ```bash
 aztec-nargo build
 ```
 
-Compile contracts
+Compile contracts:
 
 ```bash
 aztec-nargo compile
 ```
 
-Generate contract artifacts
+Generate contract artifacts (run from the voting contract directory):
 
 ```bash
-aztec codegen -o ../src/artifacts target --force
+aztec codegen -o ../../src/artifacts target --force
 ```
 
-Run test cases(Trixie)
+Run test cases (Trixie):
 
 ```bash
 aztec test
-```
-
-## Environment Setup
-
-Create a `.env.local` file in the root directory with the following variables:
-
-```
-NEXT_PUBLIC_TESTNET_NODE_URL=https://aztec-alpha-testnet-fullnode.zkv.xyz
-NEXT_PUBLIC_APP_MODE=SANDBOX # or TESTNET for testnet deployment
 ```
 
 ## Using the Starter
@@ -158,5 +172,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 # Notes
 
-What is Nargo ?
-dependency management, package management tool
+What is Nargo?
+Dependency management, package management tool for Noir contracts.
