@@ -35,7 +35,7 @@ import {
   type WrappedFieldLike,
 } from '@aztec/aztec.js';
 import ClaimContractArtifactJson from '../../circuits/claim/target/claim_contract-Claim.json' with { type: 'json' };
-export const ClaimContractArtifact = loadContractArtifact(ClaimContractArtifactJson as NoirCompiledContract);
+export const ClaimContractArtifact = loadContractArtifact(ClaimContractArtifactJson as unknown as NoirCompiledContract);
 
 
 
@@ -111,7 +111,7 @@ export class ClaimContract extends ContractBase {
    * Returns this contract's artifact with public bytecode.
    */
   public static get artifactForPublic(): ContractArtifact {
-    return loadContractArtifactForPublic(ClaimContractArtifactJson as NoirCompiledContract);
+    return loadContractArtifactForPublic(ClaimContractArtifactJson as unknown as NoirCompiledContract);
   }
   
 
