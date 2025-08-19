@@ -6,8 +6,8 @@ A modern Next.js starter template with Aztec Network integration for building pr
 
 This starter repository provides a foundation for developing decentralized applications on Aztec Network, featuring wallet integration for both Azguard and Obsidion wallets, along with a complete example of a private voting contract implementation.
 
-
 [Checkout complete walkthrough on Youtube](https://www.youtube.com/live/6BviS0dGoEw)
+
 ## Features
 
 - **Wallet Integration**: Ready-to-use connections with Azguard and Obsidion wallets
@@ -71,15 +71,11 @@ Run test cases(Trixie)
 aztec test
 ```
 
-
-**NOTE:** You need to register your contract first using script `bun run register-contract` before trying deployment using Obsidion wallet.
-
-
 ## Environment Setup
 
 Create a `.env.local` file in the root directory with the following variables:
 NEXT_PUBLIC_TESTNET_NODE_URL=https://aztec-alpha-testnet-fullnode.zkv.xyz
-APP_MODE=SANDBOX # or TESTNET for testnet deployment
+NEXT_PUBLIC_APP_MODE=SANDBOX # or TESTNET for testnet deployment
 
 ## Using the Starter
 
@@ -153,16 +149,11 @@ MIT
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-
-
-
 # Resources
+
 1. Obsidion Wallet: https://app.obsidion.xyz/
 
-
-
-
 # Notes
+
 What is Nargo ?
 dependency management, package management tool
-

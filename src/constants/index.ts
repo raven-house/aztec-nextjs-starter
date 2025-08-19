@@ -7,3 +7,8 @@ export const NODE_URL = APP_MODE === 'TESTNET' ? TESTNET_NODE_URL : 'http://loca
 
 export const OBSIDION_WALLET_URL = 'https://app.obsidion.xyz'
 export const CHAIN_ID = APP_MODE === 'TESTNET' ? 11155111 : 31337
+
+export const TIMEOUT = {
+  LOW: 200_000,
+  HIGH: 500_000,
+}
