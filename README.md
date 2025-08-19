@@ -160,7 +160,7 @@ Change the `NEXT_PUBLIC_APP_MODE` environment variable to switch between modes.
 
 ## License
 
-MIT
+This repository is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
