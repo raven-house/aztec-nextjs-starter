@@ -30,7 +30,7 @@ This starter repository provides a foundation for developing decentralized appli
 git clone https://github.com/raven-house/aztec-nextjs-starter.git
 
 # Navigate to the project directory
-cd aztec-starter
+cd aztec-nextjs-starter
 
 # Install dependencies
 npm install
@@ -74,8 +74,11 @@ aztec test
 ## Environment Setup
 
 Create a `.env.local` file in the root directory with the following variables:
+
+```
 NEXT_PUBLIC_TESTNET_NODE_URL=https://aztec-alpha-testnet-fullnode.zkv.xyz
 NEXT_PUBLIC_APP_MODE=SANDBOX # or TESTNET for testnet deployment
+```
 
 ## Using the Starter
 
