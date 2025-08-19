@@ -150,7 +150,7 @@ The application can run in two modes:
 - **SANDBOX**: For local development (default)
 - **TESTNET**: For deploying to Aztec Testnet
 
-Change the `APP_MODE` environment variable to switch between modes.
+Change the `NEXT_PUBLIC_APP_MODE` environment variable to switch between modes.
 
 ## Resources
 
