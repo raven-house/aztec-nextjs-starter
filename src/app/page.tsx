@@ -1,11 +1,15 @@
 'use client'
-import { GlobalContext } from '@/contexts/GlobalContext'
 import { useContext, useState } from 'react'
 import { toast } from 'sonner'
-import { EasyPrivateVotingContract } from '../artifacts/EasyPrivateVoting'
+import { Loader2, Vote, CheckCircle, AlertCircle, Key } from 'lucide-react'
+import { GlobalContext } from '@/contexts/GlobalContext'
+import { getContractInstanceFromDeployParams, Fr, AztecAddress } from '@aztec/aztec.js'
+import { OkResult } from '@azguardwallet/types'
 import { Contract } from '@nemi-fi/wallet-sdk/eip1193'
 import { useAccount } from '@nemi-fi/wallet-sdk/react'
 import { sdk } from '@/components/Header'
+import { TIMEOUT } from '@/constants'
+import { EasyPrivateVotingContract } from '../artifacts/EasyPrivateVoting'
 import {
   Card,
   CardContent,
@@ -15,15 +19,12 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Loader2, Vote, CheckCircle, AlertCircle, Key } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { getContractInstanceFromDeployParams, Fr, AztecAddress } from '@aztec/aztec.js'
 import { NodeInfo } from '@/components/NodeInfo'
 import { getDeployContractBatchCalls } from '@/components/register-contract-azguard'
 import { getDeployContractBatchCallsForAlreadyRegistered } from '@/components/deploy-already-registered'
-import { OkResult } from '@azguardwallet/types'
 import { validateAddress } from '@/lib/utils'
 
 const CONTRACT_ADDRESS_SALT = Fr.fromString('13')
@@ -156,7 +157,7 @@ export default function Home() {
           },
         ],
       })
-      .wait()
+      .wait({ timeout: TIMEOUT.HIGH })
     console.log('Register contract call', txn?.txHash.toString())
 
     toast.success('Contract class registered successfully')
@@ -189,7 +190,7 @@ export default function Home() {
       account.getAddress()
     )
       .send()
-      .wait({ timeout: 200000 })
+      .wait({ timeout: TIMEOUT.HIGH })
     console.log('deploy TX', deployTx)
 
     setContractAddress(deployTx.contract.address)
@@ -286,7 +287,8 @@ export default function Home() {
       if (!votingContract) return
 
       // Cast vote for option 1
-      const tx = await votingContract.methods.cast_vote(1).send().wait()
+      const tx = await votingContract.methods.cast_vote(1).send().wait({ timeout: TIMEOUT.HIGH })
+
       console.log('Vote cast transaction:', tx)
 
       toast.success('Vote cast successfully!')
@@ -308,7 +310,8 @@ export default function Home() {
       const votingContract = await getVotingContract()
       if (!votingContract) return
 
-      const tx = await votingContract.methods.end_vote().send().wait()
+      const tx = await votingContract.methods.end_vote().send().wait({ timeout: TIMEOUT.HIGH })
+
       console.log('End vote transaction:', tx)
 
       setIsVoteEnded(true)

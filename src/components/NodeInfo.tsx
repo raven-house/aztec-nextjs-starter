@@ -32,7 +32,6 @@ export const NodeInfo = () => {
 
         const chain = await aztecNode.getChainId()
         setChainId(chain.toString())
-        console.log('Chain ID', chain)
 
         const node = await aztecNode.getNodeInfo()
         setNodeInfo({
@@ -42,7 +41,6 @@ export const NodeInfo = () => {
           l1ContractAddresses: node.l1ContractAddresses || {},
           protocolContractAddresses: node.protocolContractAddresses || {},
         })
-        console.log('node info', node)
       } catch (error) {
         console.error('Error fetching node info:', error)
       } finally {
