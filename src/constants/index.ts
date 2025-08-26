@@ -1,7 +1,7 @@
 export const TESTNET_NODE_URL =
   process.env.NEXT_PUBLIC_TESTNET_NODE_URL || 'https://aztec-alpha-testnet-fullnode.zkv.xyz'
 
-export const APP_MODE = process.env.NEXT_PUBLIC_APP_MODE || 'SANDBOX'
+export const APP_MODE = process.env.NEXT_PUBLIC_APP_MODE || 'TESTNET'
 
 export const NODE_URL = APP_MODE === 'TESTNET' ? TESTNET_NODE_URL : 'http://localhost:8080'
 
